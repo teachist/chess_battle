@@ -1,0 +1,28 @@
+{% extends 'base.html' %} {% block header %}
+<h1>
+  {% block title %}你正在为: {{ player['username'] }} 登记分数{% endblock %}
+</h1>
+{% endblock %} {% block content %}
+<form method="post">
+  <!-- <div class="form-group"> -->
+  <!--   <label for="username">Player Name</label> -->
+  <!--   <input type="text" class="form-control" name="username" id="username" /> -->
+  <!-- </div> -->
+
+  <!-- <div class="form-group"> -->
+  <!--   <label for="round">Round</label> -->
+  <!--   <select id="round" name="round" class="form-control"> -->
+  <!--       <option selected>Choose...</option> -->
+  <!--       {% for round in rounds %} -->
+  <!--       <option value={{ round['id'] }}>{{ round['value'] }}</option> -->
+  <!--       {% endfor %} -->
+  <!--     </select> --=>
+  <!-- </div> -->
+
+  <div class="form-group">
+    <label for="score">Score</label>
+    <input type="text" class="form-control" name="score" id="score" />
+  </div>
+  <button type="submit" class="btn btn-primary mb-2">Register Score</button>
+</form>
+{% endblock %}

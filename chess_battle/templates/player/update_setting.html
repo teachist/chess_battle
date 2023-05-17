@@ -1,0 +1,19 @@
+{% extends 'base.html' %} {% block header %}
+<h1>{% block title %}Settings{% endblock %}</h1>
+{% endblock %} {% block content %}
+
+<h2>UPDATE SETTINGS</h2>
+{% for key, value in g.settings.items() %}
+    <form class="form-inline row" method="post">
+  <div class="form-group mb-2">
+      <label for="{{ key  }}" class="sr-only">Setting Name</label>
+      <input type="text" readonly class="form-control-plaintext" id="{{ key }}" value="{{ key }}" name="setting_name"/>
+  </div>
+  <div class="form-group mx-sm-3 mb-2">
+      <label for="{{ value }}" class="sr-only">Vaue</label>
+    <input type="text" class="form-control" id="{{ value }}" placeholder="{{ value }}"  name="setting_value" />
+  </div>
+  <button type="submit" class="btn btn-primary mb-2">Confirm identity</button>
+    </form>
+  {% endfor %}
+{% endblock %}

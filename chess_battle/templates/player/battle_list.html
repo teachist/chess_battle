@@ -1,0 +1,58 @@
+{% extends 'base.html' %} {% block header %}
+<h1>{% block title %}Battle List{% endblock %}</h1>
+{% endblock %} {% block content %}
+
+<form method="post">
+  <div class="form-row align-items-center">
+    <div class="col-auto my-1">
+      <label class="mr-sm-2" for="round">Select Round</label>
+      <select class="custom-select mr-sm-2" id="round" name="round">
+          {% for _ in range(g.settings['current_round'] | int) %}
+            <option {% if _ + 1 == ( g.settings['current_round'] |int) %} selected {% endif %} value="{{ _ +1 }}">ROUND {{ _ + 1 }}</option>
+          {% endfor %}
+      </select>
+    </div>
+    <div class="col-auto my-1">
+      <button type="submit" class="btn btn-primary">Submit</button>
+    </div>
+  </div>
+</form>
+
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th scope="col">#</th>
+      <th scope="col">A GROUP</th>
+      <th scope="col">Action</th>
+      <th scope="col">B GROUP</th>
+      <th scope="col">Action</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    {% for list_group in battle_list %}
+    <tr>
+      <th scope="row">{{ list_group['id'] }}</th>
+      <td>{{ list_group['player_a'] }}</td>
+      <td>
+        <a
+          class="btn btn-primary"
+          href="{{ url_for('player.register_score', id=list_group['player_a']) }}"
+          role="button"
+          >Register Score</a
+        >
+      </td>
+      <td>{{ list_group['player_b'] }}</td>
+      <td>
+        <a
+          class="btn btn-primary"
+          href="{{ url_for('player.register_score', id=list_group['player_b']) }}"
+          role="button"
+          >Register Score</a
+        >
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

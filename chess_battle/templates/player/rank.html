@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block header %}
+  <h1>{% block title %}Rank List{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th scope="col">#</th>
+      <th scope="col">Name</th>
+      <th scope="col">Age</th>
+      <th scope="col">School</th>
+      <th scope="col">Score</th>
+      <th scope="col">Action</th>
+  </thead>
+  <tbody>
+    {% for player in players %}
+    <tr>
+        <th scope="row">{{ player['id'] }}</th>
+      <td>{{ player['username'] }} </td>
+      <td>{{ player['age'] }}</td>
+      <td>{{ player['school'] }}</td>
+      {% if player['score'] %}
+        <td>{{ player['score'] }}</td>
+      {% else %}
+        <td>0</td>
+      {% endif %}
+      <td>
+        <a class="btn btn-primary" href="{{ url_for('player.register_score', id=player['id']) }}" role="button">Register Score</a>    
+      </td>
+    </tr>  
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
