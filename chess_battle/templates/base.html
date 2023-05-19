@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
     <!-- Bootstrap 的 CSS 文件 -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" integrity="sha384-xOolHFLEh07PJGoPkLv1IbcEPTNtaed2xpHsD9ESMhqIYd0nLMwNLD69Npy4HI+N" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css"  crossorigin="anonymous">
     {{ url_for('static', filename='style.css') }}
     <title>{% block title %}{% endblock %} - Chess Battle</title>
   </head>
@@ -22,13 +22,13 @@
           <a class="nav-link" href="{{ url_for('player.add_player') }}">Add Player <span class="sr-only">(current)</span></a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" href="{{ url_for('player.battle_list') }}">Ballte Detail</a>
+        <a class="nav-link" href="{{ url_for('player.battle_list',round=g.settings['current_round']) }}">Ballte Detail</a>
       </li>
       <li class="nav-item dropdown">
         <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown" aria-expanded="false">Settings</a>
         <div class="dropdown-menu">
-          <a class="dropdown-item" href="#">Add</a>
-          <a class="dropdown-item" href="#">Update</a>
+            <a class="dropdown-item" href="{{ url_for('settings.add') }}">Add</a>
+          <a class="dropdown-item" href="{{ url_for('settings.update') }}">Update</a>
         </div>
       </li>
     </ul>
@@ -53,7 +53,9 @@
 
     {% for message in get_flashed_messages() %}
         {% if message != None %}
-        <div class="flash">{{ message }}</div>
+            <div class="alert alert-warning" role="alert">
+                {{ message }}
+            </div> 
         {% endif %}
     {% endfor %}
     
@@ -69,15 +71,15 @@
 </main>
 
 <footer class="container fixed-bottom">
-  <p>&copy; TeachIST 2023</p>
+    <p>&copy; {{ g.settings['devloper'] }} 2023</p>
 </footer>
     <!-- 选项 1：jQuery 和 Bootstrap 集成包（集成了 Popper） -->
     <!-- <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script> -->
     <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-7ymO4nGrkm372HoSbq1OY2DP4pEZnMiA+E0F3zPr+JQQtQ82gQ1HPY3QIVtztVua" crossorigin="anonymous"></script> -->
 
     <!-- 选项 2：Popper 和 Bootstrap 的 JS 插件各自独立 -->
-    <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js" integrity="sha384-Lge2E2XotzMiwH69/MXB72yLpwyENMiOKX8zS8Qo7LDCvaBIWGL+GlRQEKIpYR04" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"  crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"  crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js"  crossorigin="anonymous"></script>
   </body>
 </html>

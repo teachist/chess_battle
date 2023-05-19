@@ -28,6 +28,13 @@ def rank():
     return render_template("player/rank.html", players=players)
 
 
+@bp.route("/<int:user_id>/score-detail")
+def socre_detail(user_id):
+    score_detail = None
+
+    return render_template("player/score_detail.html", score_detail=score_detail)
+
+
 @bp.route("/add", methods=("GET", "POST"))
 def add_player():
     if request.method == "POST":
@@ -116,24 +123,20 @@ def generate_battle_list(round):
             db.commit()
 
 
-@bp.route("/battle-list", methods=("GET", "POST"))
-def battle_list():
-    current_round = int(g.settings["current_round"])
+@bp.route("/battle-list/<int:round>", methods=("GET", "POST"))
+def battle_list(round):
     battle_list = (
         get_db()
-        .execute("SELECT * FROM battlelist WHERE round=?", (current_round,))
+        .execute(
+            "SELECT b.*, p1.username as name_a, p2.username as name_b FROM battlelist b\
+        LEFT JOIN player p1 ON b.player_a = p1.id\
+        LEFT JOIN player p2 ON b.player_b = p2.id\
+        WHERE b.round = ?",
+            (round,),
+        )
         .fetchall()
     )
-    if current_round == 1 and battle_list == []:
-        generate_battle_list(current_round)
 
-    if request.method == "POST":
-        round = request.form["round"]
-        battle_list = (
-            get_db()
-            .execute("SELECT * FROM battlelist WHERE round=?", (round,))
-            .fetchall()
-        )
     return render_template("player/battle_list.html", battle_list=battle_list)
 
 

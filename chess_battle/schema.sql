@@ -14,6 +14,10 @@ CREATE TABLE user(
 CREATE TABLE player(
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT UNIQUE NOT NULL,
+    sex TEXT,
+    id_card TEXT NOT NULL,
+    project TEXT NOT NULL,
+    phone TEXT NOT NULL,
     school TEXT,
     age INTEGER
 );
@@ -31,7 +35,7 @@ CREATE TABLE score(
 CREATE TABLE setting(
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT UNIQUE NOT NULL,
-    value TEXT NOT NULL DEFAULT 'Not set',
+    value TEXT NOT NULL DEFAULT 'Not set yet',
     created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 

@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block header %}
-  <h1>{% block title %}Rank List{% endblock %}</h1>
+  <h1>{% block title %}棋手总分排名{% endblock %}</h1>
 {% endblock %}
 
 {% block content %}
@@ -9,26 +9,26 @@
   <thead>
     <tr>
       <th scope="col">#</th>
-      <th scope="col">Name</th>
-      <th scope="col">Age</th>
-      <th scope="col">School</th>
-      <th scope="col">Score</th>
-      <th scope="col">Action</th>
+      <th scope="col">姓名</th>
+      <th scope="col">年龄</th>
+      <th scope="col">学校</th>
+      <th scope="col">总分</th>
+      <th scope="col">操作</th>
   </thead>
   <tbody>
     {% for player in players %}
     <tr>
-        <th scope="row">{{ player['id'] }}</th>
-      <td>{{ player['username'] }} </td>
-      <td>{{ player['age'] }}</td>
-      <td>{{ player['school'] }}</td>
-      {% if player['score'] %}
-        <td>{{ player['score'] }}</td>
-      {% else %}
+        <th scope="row">{{ loop.index }}</th>
+        <td>{{ player['username'] }} </td>
+        <td>{{ player['age'] }}</td>
+        <td>{{ player['school'] }}</td>
+        {% if player['score'] %}
+            <td>{{ player['score'] }}</td>
+        {% else %}
         <td>0</td>
       {% endif %}
       <td>
-        <a class="btn btn-primary" href="{{ url_for('player.register_score', id=player['id']) }}" role="button">Register Score</a>    
+        <a class="btn btn-primary" href="{{ url_for('player.register_score', id=player['id']) }}" role="button">登记分数</a>    
       </td>
     </tr>  
     {% endfor %}

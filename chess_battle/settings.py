@@ -61,11 +61,12 @@ def update():
             except db.IntegrityError:
                 error = f"{setting_name} is not existed"
         else:
-            error = "Cannot post empty entries"
+            error = "Cannot post empty entries or duplicate entry"
 
         # generate battle list when updae round setting
         if setting_name == "current_round" and error is None:
             generate_battle_list(int(setting_value))
+            return redirect(url_for("player.battle_list", round=int(setting_value)))
 
         flash(error)
 
