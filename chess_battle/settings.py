@@ -83,7 +83,7 @@ def update():
             message, category = "Cannot post empty entries or duplicate entry", 'danger'
 
         # generate battle list when updae round setting
-        if setting_name == "current_round" and message is None:
+        if setting_name == "current_round" and category == 'success':
             generate_battle_list(int(setting_value))
             flash(message, category=category)
             return redirect(url_for("player.battle_list", round=int(setting_value)))
