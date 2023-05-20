@@ -57,30 +57,35 @@ def score_detail(player_id):
 
 
 @bp.route("/add", methods=("GET", "POST"))
-def add_player():
+def add():
     if request.method == "POST":
-        username = request.form["username"]
-        school = request.form["school"]
-        age = request.form["age"]
+        name = request.form["name"]
+        id_card = request.form["id_card"]
+        project = request.form["project"]
+        phone = request.form["phone"]
         db = get_db()
-        error = None
+        message, category = None, 'warning'
 
-        if not username:
-            error = "Username is required."
+        if not name:
+            message = "Name is required."
+        if not id_card:
+            message = 'ID card is required.'
+        if not project:
+            message = 'Project is required.'
+        if not phone:
+            message = 'Phone number is required.'
 
-        if error is None:
+        if message is None:
             try:
                 db.execute(
-                    "INSERT INTO player(username, school, age) VALUES (?, ?, ?)",
-                    (username, school, age),
+                    "INSERT INTO player(name, id_card, project, phone) VALUES (?, ?, ?, ?)",
+                    (name, id_card, project, phone,),
                 )
                 db.commit()
+                message, category = f"{name} is successfully submit to DB.", 'success'
             except db.IntegrityError:
-                error = f"User {username} is already registered."
-            else:
-                # return redirect(url_for("index"))
-                return redirect("/")
-        flash(error)
+                message, category = f"User {name} is already registered.", 'danger'
+        flash(message, category=category)
 
     return render_template("player/add.html")
 
@@ -99,10 +104,11 @@ def register_score(id):
         player_id = id
         score = request.form["score"]
         round = g.settings["current_round"]
+        print(player_id, score, round)
 
         # Check if the player already had a record for current round
         record_for_current_round = db.execute(
-            'SELECT * FROM score WHERE player_id=?', (id,)).fetchone()
+            'SELECT * FROM score WHERE player_id=? and round=?', (id, round,)).fetchone()
         if record_for_current_round is None and message is None:
             db.execute(
                 "INSERT INTO score(player_id, score, round) VALUES(?,?,?)",
@@ -110,7 +116,7 @@ def register_score(id):
             )
             db.commit()
             message, category = ('Record has been writen to DB', 'success')
-            # return redirect("/")
+            return redirect(url_for('player.battle_list', round=round))
         else:
             message = 'Record for current round has already set, do not submit repeatly'
 
@@ -157,10 +163,13 @@ def battle_list(round):
     battle_list = (
         get_db()
         .execute(
-            "SELECT b.*, p1.name as name_a, p2.name as name_b FROM battlelist b\
-        LEFT JOIN player p1 ON b.player_a = p1.id\
-        LEFT JOIN player p2 ON b.player_b = p2.id\
-        WHERE b.round = ?",
+            "SELECT b.*, p1.name as name_a, s1.score as score_a, p2.name as name_b, s2.score as score_b\
+            FROM battlelist b\
+            LEFT JOIN player p1 ON b.player_a = p1.id\
+            LEFT JOIN player p2 ON b.player_b = p2.id\
+            LEFT JOIN score s1 ON b.player_a = s1.player_id and b.round=s1.round\
+            LEFT JOIN score s2 ON b.player_b = s2.player_id and b.round=s2.round\
+            WHERE b.round = ?",
             (round,),
         )
         .fetchall()

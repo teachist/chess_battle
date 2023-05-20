@@ -1,0 +1,76 @@
+{% extends 'base.html' %} {% block header %} {% endblock %} {% block content %}
+
+<div class="row">
+  <div class="col-4">
+    <div class="list-group" id="list-tab" role="tablist">
+      <a class="list-group-item list-group-item-action active" id="list-home-list" data-toggle="list" href="#list-home" role="tab" aria-controls="home">当前设置</a>
+      <a class="list-group-item list-group-item-action" id="list-profile-list" data-toggle="list" href="#list-profile" role="tab" aria-controls="profile">新增设置</a>
+      <a class="list-group-item list-group-item-action" id="list-messages-list" data-toggle="list" href="#list-messages" role="tab" aria-controls="messages">修改设置</a>
+    </div>
+  </div>
+  <div class="col-8">
+    <div class="tab-content" id="nav-tabContent">
+      <div class="tab-pane fade show active" id="list-home" role="tabpanel" aria-labelledby="list-home-list">
+        <div class="card">
+          <h5 class="card-header">{% block title %}系统设置{% endblock %}</h5>
+          <div class="card-body">
+            {% for key, value in g.settings.items() %}
+            <form class="form-inline row">
+              <div class="form-group mb-2">
+                <label for="{{ key  }}" class="sr-only">Setting Name</label>
+                <input type="text" readonly class="form-control-plaintext text-right" id="{{ key }}" value="{{ key }}" name="setting_name" />
+              </div>
+              <div class="form-group mx-sm-3 mb-2">
+                <label for="{{ value }}" class="sr-only">Vaue</label>
+                <input type="text" class="form-control-plaintext" id="{{ value }}" value="{{ value }}" name="setting_value" />
+              </div>
+            </form>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+      <div class="tab-pane fade" id="list-profile" role="tabpanel" aria-labelledby="list-profile-list">
+        <div class="card">
+          <h5 class="card-header">新增设置</h5>
+          <div class="card-body">
+            <form method="post" action="{{ url_for('settings.add') }}" class="">
+              <div class="form-group">
+                <label for="setting_name">名称</label>
+                <input type="text" class="form-control" name="setting_name" placeholder="使用全字母和下划线，不能有其它符号，比如current_round, devloper等。" id="setting_name" />
+              </div>
+              <div class="form-group">
+                <label for="setting_value">值</label>
+                <input type="text" class="form-control" name="setting_value" id="setting_value" />
+              </div>
+              <div class="form-group">
+                <button type="submit" class="btn btn-primary mb-2">提交</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+      <div class="tab-pane fade" id="list-messages" role="tabpanel" aria-labelledby="list-messages-list">
+        <div class="card">
+          <h5 class="card-header">修改设置</h5>
+          <div class="card-body">
+            {% for key, value in g.settings.items() %}
+            <form class="form-inline row" method="post" action="{{ url_for('settings.update') }}">
+              <div class="form-group mb-2">
+                <label for="{{ key  }}" class="sr-only">Setting Name</label>
+                <input type="text" readonly class="form-control-plaintext text-right" id="{{ key }}" value="{{ key }}" name="setting_name" />
+              </div>
+              <div class="form-group mx-sm-3 mb-2">
+                <label for="{{ value }}" class="sr-only">Vaue</label>
+                <input type="text" class="form-control" id="{{ value }}" placeholder="{{ value }}" name="setting_value" />
+              </div>
+              <button type="submit" class="btn btn-primary mb-2">确认提交</button>
+            </form>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

@@ -22,11 +22,10 @@ CREATE TABLE player(
 CREATE TABLE score(
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     player_id INTEGER NOT NULL,
-    created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     score INTEGER NOT NULL,
     round INTEGER NOT NULL,
-    FOREIGN KEY (player_id) REFERENCES player(id),
-    FOREIGN KEY (round) REFERENCES gemeinfo(id)
+    created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (player_id) REFERENCES player(id)
 );
 
 CREATE TABLE setting(
@@ -41,7 +40,6 @@ CREATE TABLE battlelist(
     round INTEGER NOT NULL,
     player_a INTEGER NOT NULL,
     player_b INTEGER NOT NULL,
-    FOREIGN KEY (round) REFERENCES gameinfo(id),
     FOREIGN KEY (player_a) REFERENCES player(player_id),
     FOREIGN KEY (player_b) REFERENCES player(player_id)
 );

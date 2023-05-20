@@ -1,6 +1,4 @@
-{% extends 'base.html' %} {% block header %}
-<h1>{% block title %}对阵表{% endblock %}</h1>
-{% endblock %} {% block content %}
+{% extends 'base.html' %} {% block header %} {% endblock %} {% block content %}
 
 <div class="card">
   <h5 class="card-header">请选择对阵局次</h5>
@@ -8,51 +6,65 @@
     {% for round_number in range( g.settings['current_round'] | int) %}
     <a
       href="{{ url_for('player.battle_list', round=round_number+1) }}"
-      class="btn btn-primary"
+      class="btn btn-{{ 'success' if round_number+1 == g.settings['current_round']|int  else 'secondary' }}"
       >第{{ round_number + 1}}局</a
     >
-
     {% endfor %}
-    <!-- <h5 class="card-title">Special title treatment</h5> -->
-    <!-- <p class="card-text">With supporting text below as a natural lead-in to additional content.</p> -->
-    <!-- <a href="#" class="btn btn-primary">Go somewhere</a> -->
   </div>
 </div>
-<table class="table table-striped">
-  <thead>
-    <tr>
-      <th scope="col">#</th>
-      <th scope="col">棋手甲方</th>
-      <th scope="col">操作</th>
-      <th scope="col">棋手乙方</th>
-      <th scope="col">操作</th>
-    </tr>
-  </thead>
+<br />
+<div class="card">
+  <h5 class="card-header">{% block title %}对阵表{% endblock %}</h5>
+  <div class="card-body">
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th scope="col">#</th>
+          <th scope="col">甲方棋手</th>
+          <th scope="col">本局得分</th>
+          <th scope="col">操作</th>
+          <th scope="col">乙方棋手</th>
+          <th scope="col">本局得分</th>
+          <th scope="col">操作</th>
+        </tr>
+      </thead>
 
-  <tbody>
-    {% for list_group in battle_list %}
-    <tr>
-      <th scope="row">{{ loop.index }} - {{ list_group['id'] }}</th>
-      <td>{{ list_group['player_a'] }} - {{ list_group['name_a'] }}</td>
-      <td>
-        <a
-          class="btn btn-primary"
-          href="{{ url_for('player.register_score', id=list_group['player_a']) }}"
-          role="button"
-          >登记分数</a
-        >
-      </td>
-      <td>{{ list_group['player_b'] }} - {{ list_group['name_b'] }}</td>
-      <td>
-        <a
-          class="btn btn-primary"
-          href="{{ url_for('player.register_score', id=list_group['player_b']) }}"
-          role="button"
-          >登记分数</a
-        >
-      </td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
+      <tbody>
+        {% for list_group in battle_list %}
+        <tr>
+          <th scope="row">{{ loop.index }}</th>
+          <td>{{ list_group.name_a }}</td>
+          {% if list_group.score_a | string == 'None' %}
+          <td>正在比赛</td>
+          {% else %}
+          <td>{{ list_group.score_a|string }}</td>
+          {% endif %}
+          <td>
+            <a
+              class="btn btn-primary"
+              href="{{ url_for('player.register_score', id=list_group.player_a ) }}"
+              role="button"
+              >登记分数</a
+            >
+          </td>
+          <td>{{ list_group.name_b }}</td>
+          {% if list_group.score_b | string == 'None' %}
+          <td>正在比赛</td>
+          {% else %}
+          <td>{{ list_group.score_b|string }}</td>
+          {% endif %}
+          <td>
+            <a
+              class="btn btn-primary"
+              href="{{ url_for('player.register_score', id=list_group.player_b) }}"
+              role="button"
+              >登记分数</a
+            >
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
 {% endblock %}

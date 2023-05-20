@@ -1,25 +1,30 @@
-{% extends 'base.html' %}
+{% extends 'base.html' %} {% block header %} {% endblock %} {% block content %}
+<div class="card">
+  <h5 class="card-header">{% block title %}新增棋手{% endblock %}</h5>
+  <div class="card-body">
+    <form method="post">
+      <div class="form-group">
+        <label for="name">姓名</label>
+        <input type="text" class="form-control" name="name" id="username" />
+      </div>
 
-{% block header %}
-<h1>{% block title %}Add Player{% endblock %}</h1>
-{% endblock %}
+      <div class="form-group">
+        <label for="id_card">身份证</label>
+        <input type="text" class="form-control" name="id_card" id="id_card" />
+      </div>
 
-{% block content %}
-<form method="post">
-  <div class="form-group">
-    <label for="username">Player Name</label>
-    <input type="text" class="form-control" name="username" id="username" >
-  </div>
+      <div class="form-group">
+        <label for="project">项目</label>
+        <input type="text" class="form-control" name="project" id="project" />
+      </div>
 
-  <div class="form-group">
-    <label for="school">School</label>
-    <input type="text" class="form-control" name="school" id="school" >
+      <div class="form-group">
+        <label for="phone">电话</label>
+        <input type="text" class="form-control" name="phone" id="phone" />
+      </div>
+
+      <button type="submit" class="btn btn-primary mb-2">Add Player</button>
+    </form>
   </div>
-  
-  <div class="form-group">
-    <label for="age">Age</label>
-    <input type="text" class="form-control" name="age" id="age" >
-  </div>
-  <button type="submit" class="btn btn-primary mb-2">Add Player</button>
-</form>
+</div>
 {% endblock %}
