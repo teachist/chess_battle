@@ -10,8 +10,9 @@
     <tr>
       <th scope="col">#</th>
       <th scope="col">姓名</th>
-      <th scope="col">年龄</th>
-      <th scope="col">学校</th>
+      <th scope="col">身份证</th>
+      <th scope="col">项目</th>
+      <th scope="col">电话</th>
       <th scope="col">总分</th>
       <th scope="col">操作</th>
   </thead>
@@ -19,16 +20,17 @@
     {% for player in players %}
     <tr>
         <th scope="row">{{ loop.index }}</th>
-        <td>{{ player['username'] }} </td>
-        <td>{{ player['age'] }}</td>
-        <td>{{ player['school'] }}</td>
+        <td>{{ player['name'] }} </td>
+        <td>{{ player['id_card'] }}</td>
+        <td>{{ player['project'] }}</td>
+        <td>{{ player['phone'] }}</td>
         {% if player['score'] %}
             <td>{{ player['score'] }}</td>
         {% else %}
         <td>0</td>
       {% endif %}
       <td>
-        <a class="btn btn-primary" href="{{ url_for('player.register_score', id=player['id']) }}" role="button">登记分数</a>    
+        <a class="btn btn-primary" href="{{ url_for('player.score_detail', player_id=player['id']) }}" role="button">得分详情</a>    
       </td>
     </tr>  
     {% endfor %}

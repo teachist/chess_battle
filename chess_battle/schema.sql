@@ -7,19 +7,16 @@ DROP TABLE IF EXISTS battlelist;
 
 CREATE TABLE user(
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    username TEXT UNIQUE NOT NULL,
+     TEXT UNIQUE NOT NULL,
     password TEXT NOT NULL
 );
 
 CREATE TABLE player(
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    username TEXT UNIQUE NOT NULL,
-    sex TEXT,
+    name TEXT UNIQUE NOT NULL,
     id_card TEXT NOT NULL,
     project TEXT NOT NULL,
-    phone TEXT NOT NULL,
-    school TEXT,
-    age INTEGER
+    phone TEXT NOT NULL
 );
 
 CREATE TABLE score(
@@ -50,25 +47,21 @@ CREATE TABLE battlelist(
 );
 
 
-INSERT INTO player(username, school, age) VALUES('Player A', 'Unknow School', 12);
-INSERT INTO player(username, school, age) VALUES('Player b', 'Unknow School', 12);
-INSERT INTO player(username, school, age) VALUES('Player c', 'Unknow School', 12);
-INSERT INTO player(username, school, age) VALUES('Player d', 'Unknow School', 15);
-INSERT INTO player(username, school, age) VALUES('Player e', 'Unknow School', 12);
-INSERT INTO player(username, school, age) VALUES('Player f', 'Unknow School', 11);
-INSERT INTO player(username, school, age) VALUES('Player g', 'Unknow School', 12);
-INSERT INTO player(username, school, age) VALUES('Player h', 'Unknow School', 12);
-INSERT INTO player(username, school, age) VALUES('Player i', 'Unknow School', 12);
-INSERT INTO player(username, school, age) VALUES('Player j', 'Unknow School', 12);
-INSERT INTO player(username, school, age) VALUES('Player k', 'Unknow School', 12);
-INSERT INTO player(username, school, age) VALUES('Player l', 'Unknow School', 12);
-INSERT INTO player(username, school, age) VALUES('Player m', 'Unknow School', 12);
-INSERT INTO player(username, school, age) VALUES('Player n', 'Unknow School', 12);
-INSERT INTO player(username, school, age) VALUES('Player o', 'Unknow School', 12);
-INSERT INTO player(username, school, age) VALUES('Player p', 'Unknow School', 12);
-INSERT INTO player(username, school, age) VALUES('Player q', 'Unknow School', 12);
-INSERT INTO player(username, school, age) VALUES('Player s', 'Unknow School', 11);
-INSERT INTO player(username, school, age) VALUES('Player t', 'Unknow School', 12);
-INSERT INTO player(username, school, age) VALUES('Player u', 'Unknow School', 12);
-INSERT INTO player(username, school, age) VALUES('Player v', 'Unknow School', 12);
-INSERT INTO player(username, school, age) VALUES('Player w', 'Unknow School', 11);
+INSERT INTO player(name, id_card,project, phone) VALUES('Player A', '511825200010102023X', 'Personal', '1808171123');
+INSERT INTO player(name, id_card,project, phone) VALUES('Player B', '511825200010102023X', 'Personal', '1808171123');
+INSERT INTO player(name, id_card,project, phone) VALUES('Player C', '511825200010102023X', 'Personal', '1808171123');
+INSERT INTO player(name, id_card,project, phone) VALUES('Player D', '511825200010102023X', 'Personal', '1808171123');
+INSERT INTO player(name, id_card,project, phone) VALUES('Player E', '511825200010102023X', 'Personal', '1808171123');
+INSERT INTO player(name, id_card,project, phone) VALUES('Player F', '511825200010102023X', 'Personal', '1808171123');
+INSERT INTO player(name, id_card,project, phone) VALUES('Player H', '511825200010102023X', 'Personal', '1808171123');
+INSERT INTO player(name, id_card,project, phone) VALUES('Player J', '511825200010102023X', 'Personal', '1808171123');
+INSERT INTO player(name, id_card,project, phone) VALUES('Player K', '511825200010102023X', 'Personal', '1808171123');
+INSERT INTO player(name, id_card,project, phone) VALUES('Player L', '511825200010102023X', 'Personal', '1808171123');
+INSERT INTO player(name, id_card,project, phone) VALUES('Player M', '511825200010102023X', 'Personal', '1808171123');
+INSERT INTO player(name, id_card,project, phone) VALUES('Player N', '511825200010102023X', 'Personal', '1808171123');
+INSERT INTO player(name, id_card,project, phone) VALUES('Player O', '511825200010102023X', 'Personal', '1808171123');
+INSERT INTO player(name, id_card,project, phone) VALUES('Player P', '511825200010102023X', 'Personal', '1808171123');
+INSERT INTO player(name, id_card,project, phone) VALUES('Player Q', '511825200010102023X', 'Personal', '1808171123');
+INSERT INTO player(name, id_card,project, phone) VALUES('Player R', '511825200010102023X', 'Personal', '1808171123');
+INSERT INTO player(name, id_card,project, phone) VALUES('Player S', '511825200010102023X', 'Personal', '1808171123');
+INSERT INTO player(name, id_card,project, phone) VALUES('Player T', '511825200010102023X', 'Personal', '1808171123');

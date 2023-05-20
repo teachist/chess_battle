@@ -6,7 +6,11 @@
   <h5 class="card-header">请选择对阵局次</h5>
   <div class="card-body">
     {% for round_number in range( g.settings['current_round'] | int) %}
-        <a href="{{ url_for('player.battle_list', round=round_number+1) }}" class="btn btn-primary">第{{ round_number + 1}}局</a>
+    <a
+      href="{{ url_for('player.battle_list', round=round_number+1) }}"
+      class="btn btn-primary"
+      >第{{ round_number + 1}}局</a
+    >
 
     {% endfor %}
     <!-- <h5 class="card-title">Special title treatment</h5> -->
@@ -28,7 +32,7 @@
   <tbody>
     {% for list_group in battle_list %}
     <tr>
-        <th scope="row">{{ loop.index }} - {{ list_group['id'] }}</th>
+      <th scope="row">{{ loop.index }} - {{ list_group['id'] }}</th>
       <td>{{ list_group['player_a'] }} - {{ list_group['name_a'] }}</td>
       <td>
         <a
@@ -38,7 +42,7 @@
           >登记分数</a
         >
       </td>
-      <td>{{ list_group['player_b'] }} - {{ list_group['name_a'] }}</td>
+      <td>{{ list_group['player_b'] }} - {{ list_group['name_b'] }}</td>
       <td>
         <a
           class="btn btn-primary"

@@ -1,0 +1,34 @@
+{% extends 'base.html' %} {% block header %} {% endblock %} {% block content %}
+
+<div class="card">
+  <h5 class="card-header">{% block title %}修改设置{% endblock %}</h5>
+  <div class="card-body">
+    {% for key, value in g.settings.items() %}
+    <form class="form-inline row" method="post">
+      <div class="form-group mb-2">
+        <label for="{{ key  }}" class="sr-only">Setting Name</label>
+        <input
+          type="text"
+          readonly
+          class="form-control-plaintext text-right"
+          id="{{ key }}"
+          value="{{ key }}"
+          name="setting_name"
+        />
+      </div>
+      <div class="form-group mx-sm-3 mb-2">
+        <label for="{{ value }}" class="sr-only">Vaue</label>
+        <input
+          type="text"
+          class="form-control"
+          id="{{ value }}"
+          placeholder="{{ value }}"
+          name="setting_value"
+        />
+      </div>
+      <button type="submit" class="btn btn-primary mb-2">确认提交</button>
+    </form>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}
