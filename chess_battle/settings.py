@@ -10,6 +10,7 @@ from flask import (
 )
 
 import functools
+import random
 from chess_battle.db import get_db
 
 
@@ -43,7 +44,7 @@ def generate_battle_list(round):
             db.commit()
     else:
         players = db.execute(
-            "SELECT player.*, sum(score.score) as score\
+            "SELECT `player.`*, sum(score.score) as score\
             FROM player LEFT JOIN score\
             ON player.id=score.player_id\
             GROUP BY player.id\
@@ -98,9 +99,9 @@ def update():
         setting_value = request.form["setting_value"].strip()
 
         if setting_name == "current_round" and get_player_number() > get_score_register_number_by_round(g.settings['current_round']):
-            message = 'There are still have battle in working. You can not update CURRENT ROUND!'
+            message = '还有选手正在比赛，不能更新当前局次！'
             flash(message, category)
-            return redirect(url_for('player.battle_list',
+            return redirect(url_for('battle.battle_list',
                                     round=g.settings['current_round']))
 
         if (
@@ -125,7 +126,7 @@ def update():
         if setting_name == "current_round" and category == 'success':
             generate_battle_list(int(setting_value))
             flash(message, category=category)
-            return redirect(url_for("player.battle_list", round=int(setting_value)))
+            return redirect(url_for("battle.battle_list", round=int(setting_value)))
 
         flash(message, category=category)
         return redirect(url_for("settings.index"))
