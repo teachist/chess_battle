@@ -23,20 +23,19 @@
       >
         <span class="navbar-toggler-icon"></span>
       </button>
-
       {% if g.settings %}
       <div class="collapse navbar-collapse" id="navbarsExampleDefault">
         <ul class="navbar-nav mr-auto">
-          <li class="nav-item active">
+          <li class="nav-item {{'active' if request.endpoint == 'battle.rank'}}">
             <a class="nav-link" href="{{ url_for('index') }}">排名<span class="sr-only">(current)</span></a>
           </li>
-          <li class="nav-item">
+          <li class="nav-item {{'active' if request.endpoint == 'player.list'}} ">
             <a class="nav-link" href="{{ url_for('player.list') }}">棋手管理 <span class="sr-only">(current)</span></a>
           </li>
-          <li class="nav-item">
+          <li class="nav-item {{'active' if request.endpoint == 'battle.battle_list'}}">
             <a class="nav-link" href="{{ url_for('battle.battle_list',round=g.settings['current_round']) }}">对阵表</a>
           </li>
-          <li class="nav-item">
+          <li class="nav-item {{'active' if request.endpoint == 'settings.index'}}">
             <a class="nav-link" href="{{ url_for('settings.index') }}">设置</a>
           </li>
           <!-- <li class="nav-item dropdown">
