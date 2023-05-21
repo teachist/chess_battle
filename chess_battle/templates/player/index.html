@@ -1,0 +1,139 @@
+{% extends 'base.html' %} {% block title %}棋手管理{% endblock %} {% block content %}
+<div class="row">
+  <div class="col-3">
+    <div class="list-group" id="list-tab" role="tablist">
+      <a
+        class="list-group-item list-group-item-action {{'active' if request.endpoint == 'player.list' }}"
+        id="list-player-list"
+        data-toggle="list"
+        href="#list-player"
+        role="tab"
+        aria-controls="player"
+        >棋手列表</a
+      >
+      <a
+        class="list-group-item list-group-item-action {{'active' if request.endpoint == 'player.add' }}"
+        id="list-player-add-list"
+        data-toggle="list"
+        href="#list-player-add"
+        role="tab"
+        aria-controls="player-add"
+        >新增棋手</a
+      >
+
+      <a
+        class="list-group-item list-group-item-action {{'active' if request.endpoint == 'player.update' }}"
+        id="list-player-update-list"
+        data-toggle="list"
+        href="#list-player-update"
+        role="tab"
+        aria-controls="player-update"
+        >编辑棋手</a
+      >
+    </div>
+  </div>
+  <div class="col-9">
+    <div class="tab-content" id="nav-tabContent">
+      <div class="tab-pane fade show {{'active' if request.endpoint == 'player.list' }}" id="list-player" role="tabpanel" aria-labelledby="list-player-list">
+        <div class="card">
+          <h5 class="card-header">棋手列表</h5>
+          <div class="card-body">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th scope="col">#</th>
+                  <th scope="col">姓名</th>
+                  <th scope="col">身份证</th>
+                  <th scope="col">项目</th>
+                  <th scope="col">电话</th>
+                  <th scope="col"><i class="bi bi-people-fill"></i> 操作</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {% for player in players %}
+                <tr>
+                  <th scope="row">{{ loop.index }}</th>
+                  <td>{{ player['name'] }}</td>
+                  <td>{{ player['id_card'] }}</td>
+                  <td>{{ player['project'] }}</td>
+                  <td>{{ player['phone'] }}</td>
+                  <td>
+                    <a class="btn btn-primary" href="{{ url_for('player.update', **player) }}" role="button">修改</a>
+                    <a class="btn btn-danger" href="{{ url_for('player.score_detail', player_id=player['id']) }}" role="button">删除</a>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class="tab-pane fade show {{'active' if request.endpoint == 'player.add' }}" id="list-player-add" role="tabpanel" aria-labelledby="player-add-list">
+        <div class="card">
+          <h5 class="card-header">新增棋手</h5>
+          <div class="card-body">
+            <form method="post" action="{{ url_for('player.add') }}">
+              <div class="form-group">
+                <label for="name">姓名</label>
+                <input type="text" class="form-control" name="name" id="username" />
+              </div>
+
+              <div class="form-group">
+                <label for="id_card">身份证</label>
+                <input type="text" class="form-control" name="id_card" id="id_card" />
+              </div>
+
+              <div class="form-group">
+                <label for="project">项目</label>
+                <input type="text" class="form-control" name="project" id="project" />
+              </div>
+
+              <div class="form-group">
+                <label for="phone">电话</label>
+                <input type="text" class="form-control" name="phone" id="phone" />
+              </div>
+
+              <button type="submit" class="btn btn-primary mb-2">新增棋手</button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-pane fade show {{'active' if request.endpoint == 'player.update' }}" id="list-player-update" role="tabpanel" aria-labelledby="player-update-list">
+        <div class="card">
+          <h5 class="card-header">编辑棋手</h5>
+          <div class="card-body">
+            <form method="post" action="{{ url_for('player.update') }}">
+              <input class="form-control d-none" type="text" name="id" value="{{ request.args.get('id') }}" readonly />
+
+              <div class="form-group">
+                <label for="player-name">姓名</label>
+                <input type="text" class="form-control" name="name" id="player-name" value="{{ request.args.get('name') }}" />
+              </div>
+
+              <div class="form-group">
+                <label for="id_card">身份证</label>
+                <input type="text" class="form-control" name="id_card" id="id_card" value="{{ request.args.get('id_card') }}" />
+              </div>
+
+              <div class="form-group">
+                <label for="project">项目</label>
+                <input type="text" class="form-control" name="project" id="project" value="{{ request.args.get('project') }}" />
+              </div>
+
+              <div class="form-group">
+                <label for="phone">电话</label>
+                <input type="text" class="form-control" name="phone" id="phone" value="{{ request.args.get('phone') }}" />
+              </div>
+
+              <button type="submit" class="btn btn-danger mb-2">编辑棋手</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

@@ -4,9 +4,7 @@
   <h5 class="card-header">请选择对阵局次</h5>
   <div class="card-body">
     {% for round_number in range( g.settings['current_round'] | int) %}
-    <a
-      href="{{ url_for('player.battle_list', round=round_number+1) }}"
-      class="btn btn-{{ 'success' if round_number+1 == g.settings['current_round']|int  else 'secondary' }}"
+    <a href="{{ url_for('battle.battle_list', round=round_number+1) }}" class="btn btn-{{ 'success' if round_number+1 == g.settings['current_round']|int  else 'secondary' }}"
       >第{{ round_number + 1}}局</a
     >
     {% endfor %}
@@ -40,12 +38,7 @@
           <td>{{ list_group.score_a|string }}</td>
           {% endif %}
           <td>
-            <a
-              class="btn btn-primary"
-              href="{{ url_for('player.register_score', id=list_group.player_a ) }}"
-              role="button"
-              >登记分数</a
-            >
+            <a class="btn btn-primary" href="{{ url_for('battle.register_score', id=list_group.player_a ) }}" role="button">登记分数</a>
           </td>
           <td>{{ list_group.name_b }}</td>
           {% if list_group.score_b | string == 'None' %}
@@ -54,12 +47,7 @@
           <td>{{ list_group.score_b|string }}</td>
           {% endif %}
           <td>
-            <a
-              class="btn btn-primary"
-              href="{{ url_for('player.register_score', id=list_group.player_b) }}"
-              role="button"
-              >登记分数</a
-            >
+            <a class="btn btn-primary" href="{{ url_for('battle.register_score', id=list_group.player_b) }}" role="button">登记分数</a>
           </td>
         </tr>
         {% endfor %}

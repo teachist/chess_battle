@@ -31,15 +31,15 @@ def create_app(test_config=None):
     from . import db
 
     db.init_app(app)
-    from . import auth
+    # from . import auth
     from . import settings
-
-    app.register_blueprint(settings.bp)
-
-    app.register_blueprint(auth.bp)
-
     from . import player
+    from . import battles
 
+    # app.register_blueprint(auth.bp)
+    app.register_blueprint(settings.bp)
     app.register_blueprint(player.bp)
+
+    app.register_blueprint(battles.bp)
     app.add_url_rule("/", endpoint="index")
     return app
