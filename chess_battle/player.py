@@ -84,21 +84,21 @@ def score_detail(player_id):
 @ bp.route("/add", methods=("GET", "POST"))
 def add():
     if request.method == "POST":
-        name = request.form["name"]
-        id_card = request.form["id_card"]
-        project = request.form["project"]
-        phone = request.form["phone"]
+        name = request.form["name"].strip()
+        id_card = request.form["id_card"].strip()
+        project = request.form["project"].strip()
+        phone = request.form["phone"].strip()
         db = get_db()
         message, category = None, 'warning'
 
         if not name:
             message = "Name is required."
-        if not id_card:
-            message = 'ID card is required.'
+        if not id_card or len(id_card) != 18:
+            message = 'ID card is required or length not equal to 18!'
         if not project:
             message = 'Project is required.'
-        if not phone:
-            message = 'Phone number is required.'
+        if not phone or len(phone) != 11:
+            message = 'Phone number is required or length not equal to 11!'
 
         if message is None:
             try:
