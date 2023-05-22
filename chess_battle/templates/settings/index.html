@@ -3,14 +3,14 @@
 <div class="row">
   <div class="col-4">
     <div class="list-group" id="list-tab" role="tablist">
-      <a class="list-group-item list-group-item-action active" id="list-settings-list" data-toggle="list" href="#list-settings" role="tab" aria-controls="settings">当前设置</a>
-      <a class="list-group-item list-group-item-action" id="list-settings-add-list" data-toggle="list" href="#list-settings-add" role="tab" aria-controls="settings-add">新增设置</a>
-      <a class="list-group-item list-group-item-action" id="list-settings-update-list" data-toggle="list" href="#list-settings-update" role="tab" aria-controls="settings-update">修改设置</a>
+      <a class="list-group-item list-group-item-action {{'active' if request.endpoint == 'settings.index' }}" id="list-settings-list" data-toggle="list" href="#list-settings" role="tab" aria-controls="settings">当前设置</a>
+      <a class="list-group-item list-group-item-action {{'active' if request.endpoint == 'settings.add' }}" id="list-settings-add-list" data-toggle="list" href="#list-settings-add" role="tab" aria-controls="settings-add">新增设置</a>
+      <a class="list-group-item list-group-item-action {{'active' if request.endpoint == 'settings.update' }}" id="list-settings-update-list" data-toggle="list" href="#list-settings-update" role="tab" aria-controls="settings-update">修改设置</a>
     </div>
   </div>
   <div class="col-8">
     <div class="tab-content" id="nav-tabContent">
-      <div class="tab-pane fade show active" id="list-settings" role="tabpanel" aria-labelledby="list-settings-list">
+      <div class="tab-pane fade show {{'active' if request.endpoint == 'settings.index' }}" id="list-settings" role="tabpanel" aria-labelledby="list-settings-list">
         <div class="card">
           <h5 class="card-header">{% block title %}系统设置{% endblock %}</h5>
           <div class="card-body">
@@ -29,7 +29,7 @@
           </div>
         </div>
       </div>
-      <div class="tab-pane fade" id="list-settings-add" role="tabpanel" aria-labelledby="list-settings-add-list">
+      <div class="tab-pane fade show {{'active' if request.endpoint == 'settings.add' }}" id="list-settings-add" role="tabpanel" aria-labelledby="list-settings-add-list">
         <div class="card">
           <h5 class="card-header">新增设置</h5>
           <div class="card-body">
@@ -49,7 +49,7 @@
           </div>
         </div>
       </div>
-      <div class="tab-pane fade" id="list-settings-update" role="tabpanel" aria-labelledby="list-settings-update-list">
+      <div class="tab-pane fade show {{'active' if request.endpoint == 'settings.update' }}" id="list-settings-update" role="tabpanel" aria-labelledby="list-settings-update-list">
         <div class="card">
           <h5 class="card-header">修改设置</h5>
           <div class="card-body">

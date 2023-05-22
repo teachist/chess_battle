@@ -50,7 +50,6 @@ def generate_battle_list(round):
             GROUP BY player.id\
             ORDER BY score DESC"
         ).fetchall()
-        print(players)
         for _ in range(len(players) // 2):
             db.execute(
                 "INSERT INTO battlelist(round, player_a, player_b) VALUES(?,?,?)",
@@ -79,7 +78,10 @@ def add():
                     (setting_name, setting_value),
                 )
                 db.commit()
-                message, category = f'Add setting:{setting_name} to database.', 'success'
+                message, category = f'Add Setting: [{setting_name}] to database.', 'success'
+                if category=='success' and setting_name == 'current_round' and int(setting_value) == 1:
+                    generate_battle_list(int(setting_value))
+                return redirect(url_for("battle.battle_list", round=int(setting_value)))
             except db.IntegrityError:
                 message = f"{setting_name} is already existed"
         else:
@@ -137,15 +139,14 @@ def update():
 @ bp.before_app_request
 def load_settings():
     message, catgory = None, 'error'
-    try:
-        temp_settings = get_db().execute("SELECT * FROM setting").fetchall()
-        settings = {}
-        if temp_settings is not None:
-            for temp_setting in temp_settings:
-                settings[temp_setting["name"]] = temp_setting["value"]
-        g.settings = settings
-    except:
-        message = "No settings"
+    temp_settings = get_db().execute("SELECT * FROM setting").fetchall()
+    settings = {}
+    if temp_settings is not None:
+        for temp_setting in temp_settings:
+            settings[temp_setting["name"]] = temp_setting["value"]
+    g.settings = settings
+
+    print('anything')
     print(g.settings)
     flash(message, category=catgory)
 
@@ -154,8 +155,8 @@ def settings_required(view):
     @functools.wraps(view)
     def wrapped_view(**kwargs):
         if len(g.settings) == 0:
+            flash('You must initialize the project by adding a Setting named:[current_round] firstly.', 'warning')
             return redirect(url_for('settings.add'))
-
         return view(**kwargs)
 
     return wrapped_view
