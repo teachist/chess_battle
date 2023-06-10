@@ -48,8 +48,8 @@ def generate_battle_list(round):
         # 1. The higer score should be front
         # 2. If the socre they have is the same, looking against score
         # 3. If the player have been battled with the current select player, skip it and choose another one
-        
-        ## Get players by their total score the got now
+
+        # Get players by their total score the got now
         players = db.execute(
             "SELECT player.*, sum(score.score) as score, sum(score.against_score) as against_score\
             FROM player LEFT JOIN score\
@@ -59,26 +59,32 @@ def generate_battle_list(round):
         ).fetchall()
 
         player_count = len(players)
-        
-        for _ in range( player_count // 2):
+
+        for _ in range(player_count // 2):
             # Choose 2 players in each loop
             current_player_b_pointer = 1
             player_a = players[0]
             player_b = players[current_player_b_pointer]
             # Get player's history battle lists
-            history_battle_list = db.execute('SELECT player_b FROM battlelist WHERE player_id=?',( player_a['id'], )).fetchall()
+            history_battle_list = db.execute(
+                'SELECT player_b FROM battlelist WHERE player_a=?', (player_a['id'], )).fetchall()
 
-            if  player_b['id'] not in history_battle_list:
-                db.execute(
-                    "INSERT INTO battlelist(round, player_a, player_b) VALUES(?,?,?)",
-                    (round, player_a['id'], player_b['id']),
-                )
-                db.commit()
-                players.remove( player_a )
-                players.remove( player_b )
-            else: # check by the against score
-                db.execute('SELECT * FROM SCORE')
+            # Check the 3rd condtion
+            while (player_b['id'] in history_battle_list):
+                current_player_b_pointer += 1
+                player_b = players[current_player_b_pointer]
 
+            # At this stage player_b should not in the battled with group,
+            # So it should be choosed
+            db.execute(
+                "INSERT INTO battlelist(round, player_a, player_b) VALUES(?,?,?)",
+                (round, player_a['id'], player_b['id']),
+            )
+            db.commit()
+
+            # delete from the whole group if it add to the current battle
+            players.remove(player_a)
+            players.remove(player_b)
 
 
 @bp.route("/", methods=("GET", "POST"))
@@ -102,7 +108,7 @@ def add():
                 )
                 db.commit()
                 message, category = f'Add Setting: [{setting_name}] to database.', 'success'
-                if category=='success' and setting_name == 'current_round' and int(setting_value) == 1:
+                if category == 'success' and setting_name == 'current_round' and int(setting_value) == 1:
                     generate_battle_list(int(setting_value))
                 return redirect(url_for("battle.battle_list", round=int(setting_value)))
             except db.IntegrityError:
@@ -178,7 +184,8 @@ def settings_required(view):
     @functools.wraps(view)
     def wrapped_view(**kwargs):
         if len(g.settings) == 0:
-            flash('You must initialize the project by adding a Setting named:[current_round] firstly.', 'warning')
+            flash(
+                'You must initialize the project by adding a Setting named:[current_round] firstly.', 'warning')
             return redirect(url_for('settings.add'))
         return view(**kwargs)
 
