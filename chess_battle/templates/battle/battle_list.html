@@ -14,45 +14,47 @@
 <div class="card">
   <h5 class="card-header">{% block title %}对阵表{% endblock %}</h5>
   <div class="card-body">
-    <table class="table table-striped">
-      <thead>
+    <div class="table-responsive">
+      <table class="table table-striped">
+        <thead class="thead-dark">
         <tr>
-          <th scope="col">#</th>
-          <th scope="col">甲方棋手</th>
-          <th scope="col">本局得分</th>
-          <th scope="col">操作</th>
-          <th scope="col">乙方棋手</th>
-          <th scope="col">本局得分</th>
-          <th scope="col">操作</th>
+          <th class="text-nowrap" scope="col">#</th>
+          <th class="text-nowrap" scope="col">甲方棋手</th>
+          <th class="text-nowrap" scope="col">本局得分</th>
+          <th class="text-nowrap" scope="col">操作</th>
+          <th class="text-nowrap" scope="col">乙方棋手</th>
+          <th class="text-nowrap" scope="col">本局得分</th>
+          <th class="text-nowrap" scope="col">操作</th>
         </tr>
       </thead>
 
       <tbody>
         {% for list_group in battle_list %}
         <tr>
-          <th scope="row">{{ loop.index }}</th>
-          <td>{{ list_group.name_a }}</td>
+          <th class="text-nowrap" scope="row">{{ loop.index }}</th>
+          <td class="text-nowrap">{{ list_group.name_a }} <br/><span class="badge badge-secondary">{{ list_group.org_a }}</span></td>
           {% if list_group.score_a | string == 'None' %}
-          <td>正在比赛</td>
+          <td class="text-nowrap">正在比赛</td>
           {% else %}
-          <td>{{ list_group.score_a|string }}</td>
+          <td class="text-nowrap">{{ list_group.score_a|string }}</td>
           {% endif %}
-          <td>
+          <td class="text-nowrap">
             <a class="btn btn-primary" href="{{ url_for('battle.register_score', id=list_group.player_a ) }}" role="button">登记分数</a>
           </td>
-          <td>{{ list_group.name_b }}</td>
+          <td class="text-nowrap">{{ list_group.name_b }} <br/><span class="badge badge-secondary">{{ list_group.org_b }}</span></td>
           {% if list_group.score_b | string == 'None' %}
-          <td>正在比赛</td>
+          <td class="text-nowrap">正在比赛</td>
           {% else %}
-          <td>{{ list_group.score_b|string }}</td>
+          <td class="text-nowrap">{{ list_group.score_b|string }}</td>
           {% endif %}
-          <td>
+          <td class="text-nowrap">
             <a class="btn btn-primary" href="{{ url_for('battle.register_score', id=list_group.player_b) }}" role="button">登记分数</a>
           </td>
         </tr>
         {% endfor %}
       </tbody>
     </table>
+    </div>
   </div>
 </div>
 {% endblock %}

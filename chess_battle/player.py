@@ -7,6 +7,7 @@ from flask import (
     request,
     session,
     url_for,
+    current_app,
 )
 
 from chess_battle.db import get_db
@@ -56,14 +57,20 @@ def delete(player_id):
 
 def read_player_from_csv(filename):
     import csv
-    with open(filename, newline='') as csvfile:
+    with open(filename, encoding='gbk', newline='') as csvfile:
         db = get_db()
         reader = csv.DictReader(csvfile, delimiter=',', quotechar='"')
         for row in reader:
-            name, id_card, project, phone = row['name'], row['id_card'], row['project'], row['phone']
-            db.execute("INSERT INTO player (name, id_card, project, phone) VALUES (?, ?, ?, ?)",
-                       (name, id_card, project, phone,))
+            name, gender, org, phone = row['name'].strip(), row['gender'].strip(), row['org'].strip(), row['phone'].strip()
+            db.execute("INSERT INTO player (name, gender, org, phone) VALUES (?, ?, ?, ?)",
+                       (name, gender, org, phone,))
             db.commit()
+
+@bp.route("/add_players", methods=('GET', 'POST'))
+def add_players():
+    read_player_from_csv(current_app.config['PRE_DEFINED_DATA'])
+    flash(f'Add players successful.', 'success')
+    return redirect(url_for('player.list'))
 
 
 @ bp.route("/<int:player_id>/score-detail")
@@ -85,26 +92,24 @@ def score_detail(player_id):
 def add():
     if request.method == "POST":
         name = request.form["name"].strip()
-        id_card = request.form["id_card"].strip()
-        project = request.form["project"].strip()
+        gender = request.form["gender"].strip()
+        org = request.form["org"].strip()
         phone = request.form["phone"].strip()
         db = get_db()
         message, category = None, 'warning'
 
         if not name:
             message = "Name is required."
-        if not id_card or len(id_card) != 18:
-            message = 'ID card is required or length not equal to 18!'
-        if not project:
-            message = 'Project is required.'
+        if not org:
+            message = 'Your orgnization is required.'
         if not phone or len(phone) != 11:
             message = 'Phone number is required or length not equal to 11!'
 
         if message is None:
             try:
                 db.execute(
-                    "INSERT INTO player(name, id_card, project, phone) VALUES (?, ?, ?, ?)",
-                    (name, id_card, project, phone,),
+                    "INSERT INTO player(name, gender, org, phone) VALUES (?, ?, ?, ?)",
+                    (name, gender, org, phone,),
                 )
                 db.commit()
                 message, category = f"{name} is successfully submit to DB.", 'success'

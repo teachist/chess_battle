@@ -42,7 +42,8 @@ def register_score(id):
 
     if request.method == "POST":
         player_id = id
-        score = request.form["score"]
+        score = int(request.form["score"])
+        against_score = 2 - score # against player score
         round = g.settings["current_round"]
         print(player_id, score, round)
 
@@ -51,8 +52,8 @@ def register_score(id):
             'SELECT * FROM score WHERE player_id=? and round=?', (id, round,)).fetchone()
         if record_for_current_round is None and message is None:
             db.execute(
-                "INSERT INTO score(player_id, score, round) VALUES(?,?,?)",
-                (player_id, score, round),
+                "INSERT INTO score(player_id, round, score, against_score) VALUES(?,?,?,?)",
+                (player_id, round, score, against_score),
             )
             db.commit()
             message, category = ('Record has been writen to DB', 'success')
@@ -69,7 +70,7 @@ def battle_list(round):
     battle_list = (
         get_db()
         .execute(
-            "SELECT b.*, p1.name as name_a, s1.score as score_a, p2.name as name_b, s2.score as score_b\
+            "SELECT b.*, p1.name as name_a, p1.org as org_a, s1.score as score_a, p2.name as name_b, p2.org as org_b, s2.score as score_b\
             FROM battlelist b\
             LEFT JOIN player p1 ON b.player_a = p1.id\
             LEFT JOIN player p2 ON b.player_b = p2.id\
@@ -82,3 +83,25 @@ def battle_list(round):
     )
 
     return render_template("battle/battle_list.html", battle_list=battle_list)
+
+
+@bp.route("/automation", methods=("GET", "POST"))
+def automation_for_score_register():
+    db = get_db()
+    round =  g.settings['current_round']
+    player_groups =  db.execute('SELECT player_a, player_b FROM battlelist WHERE round=?', (round, ))
+    
+    for player_group in player_groups:
+        random_score =  random.randint(0, 2)
+        against_socre = 2 - random_score
+
+        db.execute(
+                "INSERT INTO score(player_id, round, score, against_score) VALUES(?,?,?,?)",
+                (player_group['player_a'], round, random_score, against_socre),
+            )
+        db.execute(
+                "INSERT INTO score(player_id, round, score, against_score) VALUES(?,?,?,?)",
+                (player_group['player_b'], round, against_socre, random_score),
+            )
+        db.commit()
+    return redirect('/')

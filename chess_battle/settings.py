@@ -31,6 +31,7 @@ def generate_battle_list(round):
         players = db.execute("SELECT * FROM player").fetchall()
 
         print(list(players[0]))
+        # Randomly distributing players into groups
         for _ in range(len(players) // 2):
             player_a = random.choice(players)
             players.remove(player_a)
@@ -43,19 +44,41 @@ def generate_battle_list(round):
             )
             db.commit()
     else:
+        # Starting from the second round, the following requirements must be met:
+        # 1. The higer score should be front
+        # 2. If the socre they have is the same, looking against score
+        # 3. If the player have been battled with the current select player, skip it and choose another one
+        
+        ## Get players by their total score the got now
         players = db.execute(
-            "SELECT `player.`*, sum(score.score) as score\
+            "SELECT player.*, sum(score.score) as score, sum(score.against_score) as against_score\
             FROM player LEFT JOIN score\
             ON player.id=score.player_id\
             GROUP BY player.id\
-            ORDER BY score DESC"
+            ORDER BY score DESC, against_score DESC"
         ).fetchall()
-        for _ in range(len(players) // 2):
-            db.execute(
-                "INSERT INTO battlelist(round, player_a, player_b) VALUES(?,?,?)",
-                (round, players[_ * 2]["id"], players[_ * 2 + 1]["id"]),
-            )
-            db.commit()
+
+        player_count = len(players)
+        
+        for _ in range( player_count // 2):
+            # Choose 2 players in each loop
+            current_player_b_pointer = 1
+            player_a = players[0]
+            player_b = players[current_player_b_pointer]
+            # Get player's history battle lists
+            history_battle_list = db.execute('SELECT player_b FROM battlelist WHERE player_id=?',( player_a['id'], )).fetchall()
+
+            if  player_b['id'] not in history_battle_list:
+                db.execute(
+                    "INSERT INTO battlelist(round, player_a, player_b) VALUES(?,?,?)",
+                    (round, player_a['id'], player_b['id']),
+                )
+                db.commit()
+                players.remove( player_a )
+                players.remove( player_b )
+            else: # check by the against score
+                db.execute('SELECT * FROM SCORE')
+
 
 
 @bp.route("/", methods=("GET", "POST"))
