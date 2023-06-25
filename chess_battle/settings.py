@@ -44,13 +44,24 @@ def generate_battle_list(round):
                 (round, player_a["id"], player_b["id"]),
             )
             db.commit()
+
+        # Check if the total playes is an odd number
+        if players:
+            db.execute('INSERT INTO score(player_id, round, score, against_score, notes) VALUES(?,?,?,?,?)',
+                       (players[0][0], round, 2, 0, '轮空',))
+            db.commit()
     else:
         # Starting from the second round, the following requirements must be met:
         # 1. The higer score should be front
         # 2. If the socre they have is the same, looking against score
         # 3. If the player have been battled with the current select player, skip it and choose another one
+        # 4. Same org should not be battled with, with randomize it should work fine
+        # 5. Consider the player could not show up, and choose a lucky player
+        # TODO 6. player A and player B should show up exchangable
 
-        # Get players by their total score the got now
+        # ============= SOLVED PROBLEM 1 AND 2
+        # Get players by their total score order from higer to lower
+        # if it is them same score re-order by their against score
         players = db.execute(
             "SELECT player.*, sum(score.score) as score, sum(score.against_score) as against_score\
             FROM player LEFT JOIN score\
@@ -61,19 +72,76 @@ def generate_battle_list(round):
 
         player_count = len(players)
 
+        # ============= SOLVED PROBLEM 5
+        # Check if the total playes is an odd number
+        # randomly choose a player as lucky player and add +2 points to it
+        # This lucky player can only choosed once
+        if player_count % 2 == 1:
+            lucky_players = db.execute(
+                'SELECT player_id FROM score WHERE notes=?', ('轮空', )).fetchall()
+            lucky_players_idx = []
+            for _ in lucky_players:
+                lucky_players_idx.append(_[0])
+
+            print(lucky_players_idx)
+            lucky_player = random.choice(players)
+            while (lucky_player[0] in lucky_players_idx):
+                lucky_player = random.choice(players)
+
+            db.execute('INSERT INTO score(player_id, round, score, against_score, notes) VALUES(?,?,?,?,?)',
+                       (lucky_player[0], round, 2, 0, '轮空',))
+            db.commit()
+
+            players.remove(lucky_player)
+
+        # ============= SOLVED PROBLEM 3 AND 4
         for _ in range(player_count // 2):
             # Choose 2 players in each loop
             current_player_b_pointer = 1
             player_a = players[0]
             player_b = players[current_player_b_pointer]
-            # Get player's history battle lists
-            history_battle_list = db.execute(
-                'SELECT player_b FROM battlelist WHERE player_a=?', (player_a['id'], )).fetchall()
 
+            # Get player's history battle list
+            history_battle_list = db.execute(
+                'SELECT player_b FROM battlelist WHERE player_a=?\
+                UNION \
+                SELECT player_a FROM battlelist WHERE player_b=?', (player_a['id'], player_a['id'], )).fetchall()
+
+            history_battle_list_idx = []
+            for _idx in history_battle_list:
+                history_battle_list_idx.append(_idx[0])
+
+            # print(list(history_battle_list_idx))
             # Check the 3rd condtion
-            while (player_b['id'] in history_battle_list):
-                current_player_b_pointer += 1
-                player_b = players[current_player_b_pointer]
+            flag = True
+            while (flag and len(players) > 2):  # when player less 2 just insert it
+
+                # ============= SOLVED PROBLEM 6
+                # Change the order who play first
+                player_a_first_query = db.execute('SELECT player_a FROM battlelist \
+                                            WHERE player_a=? AND round=? UNION \
+                                            SELECT player_a FROM battlelist \
+                                            WHERE player_a=? AND round=?',
+                                                  (player_a[0], round-1, player_b[0], round-1, )).fetchall()
+                player_a_first_idx_set = set()
+                for _ in player_a_first_query:
+                    player_a_first_idx_set.add(_[0])
+
+                player_ab_set = set({player_a[0], player_b[0]})
+
+                # print(player_a_first_idx_set, player_ab_set,
+                #       current_player_b_pointer)
+
+                # Every one should only be the 1st once in conjuction round
+                # But if the players is odd there may be times that both of them can be the 1st to play
+                if (len(player_ab_set - player_a_first_idx_set) == 1 and player_b['id'] not in history_battle_list_idx):
+                    player_a, player_b = player_b, player_a
+                    # print('Changed Successful')
+                    flag = False
+                else:
+                    current_player_b_pointer += 1
+                    player_b = players[current_player_b_pointer]
+                    # print('PLAYER B INDEX:', current_player_b_pointer)
 
             # At this stage player_b should not in the battled with group,
             # So it should be choosed
@@ -82,6 +150,7 @@ def generate_battle_list(round):
                 (round, player_a['id'], player_b['id']),
             )
             db.commit()
+            # print('INSERT ONE RECORD:', len(players))
 
             # delete from the whole group if it add to the current battle
             players.remove(player_a)
@@ -104,14 +173,14 @@ def add():
         if setting_name != "" and setting_value != "":
             try:
                 db.execute(
-                    "INSERT INTO setting(name, value) VALUES(?,?)",
+                    "INSERT INTO settings(name, value) VALUES(?,?)",
                     (setting_name, setting_value),
                 )
                 db.commit()
                 message, category = f'Add Setting: [{setting_name}] to database.', 'success'
-                if category == 'success' and setting_name == 'current_round' and int(setting_value) == 1:
+                if category == 'success' and setting_name == 'current_round' and setting_value == '1':
                     generate_battle_list(int(setting_value))
-                return redirect(url_for("battle.battle_list", round=int(setting_value)))
+                    return redirect(url_for("battle.battle_list", round=int(setting_value)))
             except db.IntegrityError:
                 message = f"{setting_name} is already existed"
         else:
@@ -144,7 +213,7 @@ def update():
         ):
             try:
                 db.execute(
-                    "UPDATE setting SET value=? WHERE name = ?",
+                    "UPDATE settings SET value=? WHERE name = ?",
                     (setting_value, setting_name),
                 )
                 db.commit()
@@ -169,14 +238,13 @@ def update():
 @ bp.before_app_request
 def load_settings():
     message, catgory = None, 'error'
-    temp_settings = get_db().execute("SELECT * FROM setting").fetchall()
+    temp_settings = get_db().execute("SELECT * FROM settings").fetchall()
     settings = {}
     if temp_settings is not None:
         for temp_setting in temp_settings:
             settings[temp_setting["name"]] = temp_setting["value"]
     g.settings = settings
 
-    print('anything')
     print(g.settings)
     flash(message, category=catgory)
 

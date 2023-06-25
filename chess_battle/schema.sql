@@ -1,7 +1,7 @@
 -- DROP TABLE IF EXISTS user;
 DROP TABLE IF EXISTS player;
 DROP TABLE IF EXISTS score;
-DROP TABLE IF EXISTS setting;
+DROP TABLE IF EXISTS settings;
 DROP TABLE IF EXISTS battlelist;
 
 -- CREATE TABLE user(
@@ -24,11 +24,12 @@ CREATE TABLE score(
     round INTEGER NOT NULL,
     score INTEGER NOT NULL,
     against_score INTEGER NOT NULL,
+    notes TEXT,
     created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (player_id) REFERENCES player(id)
 );
 
-CREATE TABLE setting(
+CREATE TABLE settings(
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     type TEXT,
     name TEXT UNIQUE NOT NULL,

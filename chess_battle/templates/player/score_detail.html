@@ -7,6 +7,7 @@
       <th scope="col">局次#</th>
       <th scope="col">得分</th>
       <th scope="col">对手分</th>
+      <th scope="col">说明</th>
       <th scope="col">时间</th>
     </tr>
   </thead>
@@ -17,6 +18,11 @@
       <th scope="row">{{ score_list['round'] }}</th>
       <td>{{ score_list['score'] }}</td>
       <td>{{ score_list['against_score'] }}</td>
+      {% if score_list.notes | string == 'None' %}
+      <td class="text-nowrap">-</td>
+      {% else %}
+      <td class="text-nowrap">{{ score_list.notes|string }}</td>
+      {% endif %}
       <td>{{ score_list['created']}}</td>
     </tr>
     {% endfor %}

@@ -1,41 +1,54 @@
 {% extends 'base.html' %}
 
 {% block header %}
+
+<div class="rank-header">
   <h1>{% block title %}棋手总分排名{% endblock %}</h1>
+  <button id="csv_export" type="button" class="btn btn-success pull-right">导出到CSV</button>
+</div>
 {% endblock %}
 
 {% block content %}
+
+
 <div class="table-responsive">
-<table class="table table-striped">
-  <thead class="thead-dark">
-    <tr>
-      <th scope="col">#</th>
-      <th class="text-nowrap" scope="col">姓名</th>
-      <th class="text-nowrap" scope="col">性别</th>
-      <th class="text-nowrap" scope="col">单位</th>
-      <th class="text-nowrap" scope="col">电话</th>
-      <th class="text-nowrap" scope="col">总分</th>
-      <th class="text-nowrap" scope="col">操作</th>
-  </thead>
-  <tbody>
-    {% for player in players %}
-    <tr>
+  <table class="table table-striped">
+    <thead class="thead-dark">
+      <tr>
+        <th scope="col">#</th>
+        <th class="text-nowrap" scope="col">姓名</th>
+        <th class="text-nowrap" scope="col">性别</th>
+        <th class="text-nowrap" scope="col">单位</th>
+        <th class="text-nowrap" scope="col">电话</th>
+        <th class="text-nowrap" scope="col">总分</th>
+        <th class="text-nowrap" scope="col">备注</th>
+        <th class="text-nowrap" scope="col">操作</th>
+    </thead>
+    <tbody>
+      {% for player in players %}
+      <tr>
         <th scope="row">{{ loop.index }}</th>
         <td class="text-nowrap">{{ player['name'] }} </td>
         <td class="text-nowrap">{{ player['gender'] }}</td>
         <td class="text-nowrap">{{ player['org'] }}</td>
         <td class="text-nowrap">{{ player['phone'] }}</td>
         {% if player['score'] %}
-            <td class="text-nowrap">{{ player['score'] }}</td>
+        <td class="text-nowrap">{{ player['score'] }}</td>
         {% else %}
         <td class="text-nowrap">0</td>
-      {% endif %}
-      <td class="text-nowrap">
-        <a class="btn btn-primary" href="{{ url_for('player.score_detail', player_id=player['id']) }}" role="button">得分详情</a>    
-      </td>
-    </tr>  
-    {% endfor %}
-  </tbody>
-</table>
+        {% endif %}
+        {% if player.id in lucky_players %}
+        <td class="text-nowrap">第{{ lucky_players[player.id] }}轮轮空</td>
+        {% else %}
+        <td class="text-nowrap">-</td>
+        {% endif %}
+        <td class="text-nowrap">
+          <a class="btn btn-primary" href="{{ url_for('player.score_detail', player_id=player['id']) }}"
+            role="button">得分详情</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
 </div>
 {% endblock %}

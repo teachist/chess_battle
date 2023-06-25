@@ -2,3 +2,13 @@
 body {
   padding-top: 3.5rem;
 }
+
+.rank-header {
+  position: relative;
+}
+
+.rank-header button {
+  position: absolute;
+  bottom: 0px;
+  right: 0px;
+}
