@@ -23,7 +23,10 @@
     <div class="collapse navbar-collapse" id="navbarsExampleDefault">
       <ul class="navbar-nav mr-auto">
         <li class="nav-item {{'active' if request.endpoint == 'battle.rank'}}">
-          <a class="nav-link" href="{{ url_for('index') }}">排名<span class="sr-only">(current)</span></a>
+          <a class="nav-link" href="{{ url_for('index') }}">个人排名<span class="sr-only">(current)</span></a>
+        </li>
+        <li class="nav-item {{'active' if request.endpoint == 'battle.rank_group'}}">
+          <a class="nav-link" href="{{ url_for('battle.rank_group') }}">团队排名<span class="sr-only">(current)</span></a>
         </li>
         <li class="nav-item {{'active' if request.endpoint == 'battle.battle_list'}}">
           <a class="nav-link" href="{{ url_for('battle.battle_list',round=g.settings['current_round']) }}">对阵表</a>

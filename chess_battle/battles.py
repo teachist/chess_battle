@@ -36,11 +36,19 @@ def csv_export_battlelist(round=1):
         )
         .fetchall()
     )
+
+    lucky_player = get_db().execute(
+        'SELECT p.name, p.org FROM player p \
+            LEFT JOIN score s ON p.id=s.player_id \
+                WHERE s.notes=? AND round=?', ('轮空', round,)).fetchone()
+
     filename = os.path.join(current_app.instance_path,
                             'battlelist_round_{}.csv'.format(round))
     with open(filename, 'w', encoding='gbk') as fh:
         csvwriter = csv.writer(fh)
         csvwriter.writerow(['象棋比赛第{}轮对阵情况表'.format(round)])
+        csvwriter.writerow(
+            ['{}(来自{})：在{}轮中轮空'.format(lucky_player[0], lucky_player[1], round)])
         csvwriter.writerow(['先手', '来自单位', '本局得分', '后手', '来自单位', '本局得分'])
         csvwriter.writerows(battle_list)
     flash(f'对阵表：第{round}轮导出成功！', category='success')
@@ -61,8 +69,9 @@ def summary_export():
     filename = os.path.join(current_app.instance_path, 'player_export.csv')
     with open(filename, 'w', encoding='gbk') as fh:
         csvwriter = csv.writer(fh)
-        csvwriter.writerow(['姓名', '性别', '单位', '电话', '累计得分'])
-        csvwriter.writerows(players)
+        csvwriter.writerow(['排名', '姓名', '性别', '单位', '电话', '累计得分'])
+        for idx, player in enumerate(players):
+            csvwriter.writerow([idx+1] + list(player))
     flash(f'当前选手数据导出成功！', category='success')
     return send_file(filename, mimetype='text/csv',  download_name=os.path.basename(filename), as_attachment=True)
 
@@ -87,6 +96,43 @@ def rank():
         lucky_players_id[lucky_player['player_id']] = lucky_player['round']
 
     return render_template("battle/rank.html", players=players, lucky_players=lucky_players_id)
+
+
+def get_group_rank_list():
+    db = get_db()
+    groups = db.execute(
+        "SELECT player.org, sum(score.score) as score\
+        FROM player LEFT JOIN score\
+        ON player.id=score.player_id\
+        GROUP BY player.org\
+        ORDER BY score DESC"
+    ).fetchall()
+    return groups
+
+
+@bp.route("/group-rank", methods=("GET",))
+@settings_required
+def rank_group():
+    groups = get_group_rank_list()
+    return render_template("battle/rank_group.html", groups=groups)
+
+
+@bp.route("/group-rank/export", methods=("GET", "POST"))
+@settings_required
+def rank_group_export():
+    groups = get_group_rank_list()
+
+    filename = os.path.join(current_app.instance_path,
+                            'group_summary_export.csv')
+    with open(filename, 'w', encoding='gbk') as fh:
+        csvwriter = csv.writer(fh)
+        csvwriter.writerow(['排名', '团体名称', '累计得分'])
+
+        for idx, group in enumerate(groups):
+            csvwriter.writerow([idx+1] + list(group))
+
+    flash(f'当前团体积分排名数据导出成功！', category='success')
+    return send_file(filename, mimetype='text/csv',  download_name=os.path.basename(filename), as_attachment=True)
 
 
 @ bp.route("/<int:id>/register-score", methods=("GET", "POST"))

@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block header %}
+
+<div class="rank-header">
+  <h1>{% block title %}团体总分排名{% endblock %}</h1>
+</div>
+{% endblock %}
+
+{% block content %}
+
+
+<div class="table-responsive">
+  <table class="table table-striped">
+    <thead class="thead-dark">
+      <tr>
+        <th scope="col">#</th>
+        <th class="text-nowrap" scope="col">团体名称</th>
+        <th class="text-nowrap" scope="col">总分</th>
+    </thead>
+    <tbody>
+      {% for group in groups %}
+      <tr>
+        <th scope="row">{{ loop.index }}</th>
+        <td class="text-nowrap">{{ group['org'] }} </td>
+        {% if group['score'] %}
+        <td class="text-nowrap">{{ group['score'] }}</td>
+        {% else %}
+        <td class="text-nowrap">0</td>
+        {% endif %}
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

@@ -15,7 +15,7 @@ CREATE TABLE player(
     name TEXT UNIQUE NOT NULL,
     gender TEXT(2) NOT NULL,
     org TEXT NOT NULL,
-    phone TEXT(11) UNIQUE NOT NULL
+    phone TEXT(11) NOT NULL
 );
 
 CREATE TABLE score(
