@@ -12,26 +12,27 @@ from flask import (
 
 import functools
 import random
-from chess_battle.db import get_db
+from chess_battle.database import db, Player, Battlelist, Score, Settings
+from sqlalchemy import func
+from sqlalchemy import union
 
 
 bp = Blueprint("settings", __name__, url_prefix="/settings")
 
 
 def get_player_number():
-    return get_db().execute('SELECT COUNT(*) as player_number FROM player').fetchone()['player_number']
+    return len(Player.query.all())
 
 
 def get_score_register_number_by_round(round):
-    return get_db().execute('SELECT COUNT(*) as score_register_number FROM score WHERE round=?', (round,)).fetchone()['score_register_number']
+    return len(Score.query.filter_by(round=round).all())
 
 
 def generate_battle_list(round):
-    db = get_db()
     if round == 1:
-        players = db.execute("SELECT * FROM player").fetchall()
+        players = Player.query.all()
 
-        print(list(players[0]))
+        print(players)
         # Randomly distributing players into groups
         for _ in range(len(players) // 2):
             player_a = random.choice(players)
@@ -39,17 +40,17 @@ def generate_battle_list(round):
             player_b = random.choice(players)
             players.remove(player_b)
 
-            db.execute(
-                "INSERT INTO battlelist(round, player_a, player_b) VALUES(?,?,?)",
-                (round, player_a["id"], player_b["id"]),
-            )
-            db.commit()
+            bl = Battlelist(round=round, player_a=player_a.id,
+                            player_b=player_b.id)
+            db.session.add(bl)
+            db.session.commit()
 
         # Check if the total playes is an odd number
         if players:
-            db.execute('INSERT INTO score(player_id, round, score, against_score, notes) VALUES(?,?,?,?,?)',
-                       (players[0][0], round, 2, 0, '轮空',))
-            db.commit()
+            player_score = Score(
+                player_id=players[0]['id'], round=round, score=2, against_score=0, notes='轮空')
+            db.session.add(player_score)
+            db.session.commit()
     else:
         # Starting from the second round, the following requirements must be met:
         # 1. The higer score should be front
@@ -62,13 +63,20 @@ def generate_battle_list(round):
         # ============= SOLVED PROBLEM 1 AND 2
         # Get players by their total score order from higer to lower
         # if it is them same score re-order by their against score
-        players = db.execute(
-            "SELECT player.*, sum(score.score) as score, sum(score.against_score) as against_score\
-            FROM player LEFT JOIN score\
-            ON player.id=score.player_id\
-            GROUP BY player.id\
-            ORDER BY score DESC, against_score DESC"
-        ).fetchall()
+        # players = db.session.execute(
+        #     "SELECT player.*, sum(score.score) as score, sum(score.against_score) as against_score\
+        #     FROM player LEFT JOIN score\
+        #     ON player.id=score.player_id\
+        #     GROUP BY player.id\
+        #     ORDER BY score DESC, against_score DESC"
+        # ).all()
+
+        players = db.session.query(Player, func.sum(Score.score), func.sum(Score.against_score))\
+            .join(Score, Player.id == Score.player_id)\
+            .group_by(Player.id)\
+            .order_by(func.sum(Score.score).desc())\
+            .order_by(func.sum(Score.against_score).desc())\
+            .all()
 
         player_count = len(players)
 
@@ -77,8 +85,7 @@ def generate_battle_list(round):
         # randomly choose a player as lucky player and add +2 points to it
         # This lucky player can only choosed once
         if player_count % 2 == 1:
-            lucky_players = db.execute(
-                'SELECT player_id FROM score WHERE notes=?', ('轮空', )).fetchall()
+            lucky_players = Score.query.filter_by(notes='轮空').all()
             lucky_players_idx = []
             for _ in lucky_players:
                 lucky_players_idx.append(_[0])
@@ -88,9 +95,11 @@ def generate_battle_list(round):
             while (lucky_player[0] in lucky_players_idx):
                 lucky_player = random.choice(players)
 
-            db.execute('INSERT INTO score(player_id, round, score, against_score, notes) VALUES(?,?,?,?,?)',
-                       (lucky_player[0], round, 2, 0, '轮空',))
-            db.commit()
+            luky_player_in_current_round = Score(
+                player_id=lucky_player[0], round=round, score=2, against_score=0, notes='轮空')
+            db.session.add(luky_player_in_current_round)
+
+            db.session.commit()
 
             players.remove(lucky_player)
 
@@ -102,10 +111,13 @@ def generate_battle_list(round):
             player_b = players[current_player_b_pointer]
 
             # Get player's history battle list
-            history_battle_list = db.execute(
-                'SELECT player_b FROM battlelist WHERE player_a=?\
-                UNION \
-                SELECT player_a FROM battlelist WHERE player_b=?', (player_a['id'], player_a['id'], )).fetchall()
+            # history_battle_list = db.session.execute(
+            #     'SELECT player_b FROM battlelist WHERE player_a=?\
+            #     UNION \
+            #     SELECT player_a FROM battlelist WHERE player_b=?', (player_a['id'], player_a['id'], )).fetchall()
+
+            history_battle_list = union(db.session.query(Battlelist.player_b).filter_by(player_a=player_a.id).all(),
+                                        db.session.query(Battlelist.player_a).filter_by(player_b=player_a.id).all())
 
             history_battle_list_idx = []
             for _idx in history_battle_list:
@@ -118,11 +130,11 @@ def generate_battle_list(round):
 
                 # ============= SOLVED PROBLEM 6
                 # Change the order who play first
-                player_a_first_query = db.execute('SELECT player_a FROM battlelist \
+                player_a_first_query = db.session.execute('SELECT player_a FROM battlelist \
                                             WHERE player_a=? AND round=? UNION \
                                             SELECT player_a FROM battlelist \
                                             WHERE player_a=? AND round=?',
-                                                  (player_a[0], round-1, player_b[0], round-1, )).fetchall()
+                                                          (player_a[0], round-1, player_b[0], round-1, )).fetchall()
                 player_a_first_idx_set = set()
                 for _ in player_a_first_query:
                     player_a_first_idx_set.add(_[0])
@@ -145,11 +157,11 @@ def generate_battle_list(round):
 
             # At this stage player_b should not in the battled with group,
             # So it should be choosed
-            db.execute(
+            db.session.execute(
                 "INSERT INTO battlelist(round, player_a, player_b) VALUES(?,?,?)",
                 (round, player_a['id'], player_b['id']),
             )
-            db.commit()
+            db.session.commit()
             # print('INSERT ONE RECORD:', len(players))
 
             # delete from the whole group if it add to the current battle
@@ -165,18 +177,15 @@ def index():
 @bp.route("/add", methods=("GET", "POST"))
 def add():
     if request.method == "POST":
-        db = get_db()
         message, category = None, 'warning'
         setting_name = request.form["setting_name"].strip()
         setting_value = request.form["setting_value"].strip()
 
         if setting_name != "" and setting_value != "":
             try:
-                db.execute(
-                    "INSERT INTO settings(name, value) VALUES(?,?)",
-                    (setting_name, setting_value),
-                )
-                db.commit()
+                new_setting = Settings(name=setting_name, value=setting_value)
+                db.session.add(new_setting)
+                db.session.commit()
                 message, category = f'Add Setting: [{setting_name}] to database.', 'success'
                 if category == 'success' and setting_name == 'current_round' and setting_value == '1':
                     generate_battle_list(int(setting_value))
@@ -238,11 +247,13 @@ def update():
 @ bp.before_app_request
 def load_settings():
     message, catgory = None, 'error'
-    temp_settings = get_db().execute("SELECT * FROM settings").fetchall()
+    temp_settings = Settings.query.all()
+    print(temp_settings)
     settings = {}
     if temp_settings is not None:
         for temp_setting in temp_settings:
-            settings[temp_setting["name"]] = temp_setting["value"]
+            print(temp_setting)
+            settings[temp_setting.name] = temp_setting.value
     g.settings = settings
 
     print(g.settings)

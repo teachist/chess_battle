@@ -22,9 +22,9 @@
       {% for group in groups %}
       <tr>
         <th scope="row">{{ loop.index }}</th>
-        <td class="text-nowrap">{{ group['org'] }} </td>
-        {% if group['score'] %}
-        <td class="text-nowrap">{{ group['score'] }}</td>
+        <td class="text-nowrap">{{ group[0]['org'] }} </td>
+        {% if group[1] %}
+        <td class="text-nowrap">{{ group[1] }}</td>
         {% else %}
         <td class="text-nowrap">0</td>
         {% endif %}

@@ -28,22 +28,22 @@
       {% for player in players %}
       <tr>
         <th scope="row">{{ loop.index }}</th>
-        <td class="text-nowrap">{{ player['name'] }} </td>
-        <td class="text-nowrap">{{ player['gender'] }}</td>
-        <td class="text-nowrap">{{ player['org'] }}</td>
-        <td class="text-nowrap">{{ player['phone'] }}</td>
-        {% if player['score'] %}
-        <td class="text-nowrap">{{ player['score'] }}</td>
+        <td class="text-nowrap">{{ player[0]['name'] }} </td>
+        <td class="text-nowrap">{{ player[0]['gender'] }}</td>
+        <td class="text-nowrap">{{ player[0]['org'] }}</td>
+        <td class="text-nowrap">{{ player[0]['phone'] }}</td>
+        {% if player[1] %}
+        <td class="text-nowrap">{{ player[1] }}</td>
         {% else %}
         <td class="text-nowrap">0</td>
         {% endif %}
-        {% if player.id in lucky_players %}
+        {% if player[0].id in lucky_players %}
         <td class="text-nowrap">第{{ lucky_players[player.id] }}轮轮空</td>
         {% else %}
         <td class="text-nowrap">-</td>
         {% endif %}
         <td class="text-nowrap">
-          <a class="btn btn-primary" href="{{ url_for('player.score_detail', player_id=player['id']) }}"
+          <a class="btn btn-primary" href="{{ url_for('player.score_detail', player_id=player[0]['id']) }}"
             role="button">得分详情</a>
         </td>
       </tr>

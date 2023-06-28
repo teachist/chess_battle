@@ -11,11 +11,12 @@ from flask import (
     current_app,
 )
 
-from chess_battle.db import get_db
+from chess_battle.database import db, Player, Score, Battlelist
 from chess_battle.settings import settings_required
 import random
 import csv
 import os
+from sqlalchemy import func
 
 bp = Blueprint("battle", __name__)
 
@@ -79,17 +80,13 @@ def summary_export():
 @bp.route("/", methods=("GET",))
 @settings_required
 def rank():
-    db = get_db()
-    players = db.execute(
-        "SELECT player.*, sum(score.score) as score\
-        FROM player LEFT JOIN score\
-        ON player.id=score.player_id\
-        GROUP BY player.id\
-        ORDER BY score DESC"
-    )
 
-    lucky_players = db.execute(
-        'SELECT player_id, round FROM score WHERE notes=?', ('轮空', )).fetchall()
+    players = db.session.query(Player, func.sum(Score.score))\
+        .join(Score, Player.id == Score.player_id)\
+        .group_by(Player.id)\
+        .order_by(func.sum(Score.score).desc()).all()
+
+    lucky_players = Score.query.filter_by(notes='轮空').all()
 
     lucky_players_id = {}
     for lucky_player in lucky_players:
@@ -99,14 +96,11 @@ def rank():
 
 
 def get_group_rank_list():
-    db = get_db()
-    groups = db.execute(
-        "SELECT player.org, sum(score.score) as score\
-        FROM player LEFT JOIN score\
-        ON player.id=score.player_id\
-        GROUP BY player.org\
-        ORDER BY score DESC"
-    ).fetchall()
+
+    groups = db.session.query(Player, func.sum(Score.score))\
+        .join(Score, Player.id == Score.player_id)\
+        .group_by(Player.org)\
+        .order_by(func.sum(Score.score).desc()).all()
     return groups
 
 
@@ -129,7 +123,7 @@ def rank_group_export():
         csvwriter.writerow(['排名', '团体名称', '累计得分'])
 
         for idx, group in enumerate(groups):
-            csvwriter.writerow([idx+1] + list(group))
+            csvwriter.writerow([idx+1] + [group[0].org] + [group[1]])
 
     flash(f'当前团体积分排名数据导出成功！', category='success')
     return send_file(filename, mimetype='text/csv',  download_name=os.path.basename(filename), as_attachment=True)
@@ -139,8 +133,8 @@ def rank_group_export():
 def register_score(id):
     # Get Player name by id
     message, category = None, 'warning'
-    db = get_db()
-    player = db.execute("SELECT * FROM player where id=?", (id,)).fetchone()
+
+    player = Player.query.filter_by(id=id).first()
     if player is None:
         message = f"Player is not fonud"
         return redirect("/")
@@ -150,17 +144,16 @@ def register_score(id):
         score = int(request.form["score"])
         against_score = 2 - score  # against player score
         round = g.settings["current_round"]
-        print(player_id, score, round)
 
         # Check if the player already had a record for current round
-        record_for_current_round = db.execute(
-            'SELECT * FROM score WHERE player_id=? and round=?', (id, round,)).fetchone()
+        record_for_current_round = Score.query.filter_by(
+            player_id=id, round=round).first()
         if record_for_current_round is None and message is None:
-            db.execute(
-                "INSERT INTO score(player_id, round, score, against_score) VALUES(?,?,?,?)",
-                (player_id, round, score, against_score),
-            )
-            db.commit()
+
+            player_socre = Score(
+                player_id=player_id, round=round, score=score, against_score=against_score)
+            db.session.add(player_socre)
+            db.session.commit()
             message, category = ('Record has been writen to DB', 'success')
             return redirect(url_for('battle.battle_list', round=round))
         else:
@@ -172,42 +165,29 @@ def register_score(id):
 
 @ bp.route("/battle-list/<int:round>", methods=("GET", "POST"))
 def battle_list(round):
-    battle_list = (
-        get_db()
-        .execute(
-            "SELECT b.*, p1.name as name_a, p1.org as org_a, s1.score as score_a, p2.name as name_b, p2.org as org_b, s2.score as score_b\
-            FROM battlelist b\
-            LEFT JOIN player p1 ON b.player_a = p1.id\
-            LEFT JOIN player p2 ON b.player_b = p2.id\
-            LEFT JOIN score s1 ON b.player_a = s1.player_id and b.round=s1.round\
-            LEFT JOIN score s2 ON b.player_b = s2.player_id and b.round=s2.round\
-            WHERE b.round = ?",
-            (round,),
-        )
-        .fetchall()
-    )
 
+    battle_list = Battlelist.query.filter_by(round=round).all()
+
+    for bl in battle_list:
+        print(dir(bl), dir(bl.player_a_t), bl.player_a_t.scores[0].score)
     return render_template("battle/battle_list.html", battle_list=battle_list)
 
 
 @bp.route("/battle-list/<int:round>/automation", methods=("GET", "POST"))
 def automation_for_score_register(round):
-    db = get_db()
-    round = g.settings['current_round']
-    player_groups = db.execute(
-        'SELECT player_a, player_b FROM battlelist WHERE round=?', (round, ))
+
+    player_groups = Battlelist.query.filter_by(round=round).all()
 
     for player_group in player_groups:
         random_score = random.randint(0, 2)
-        against_socre = 2 - random_score
+        against_score = 2 - random_score
 
-        db.execute(
-            "INSERT INTO score(player_id, round, score, against_score) VALUES(?,?,?,?)",
-            (player_group['player_a'], round, random_score, against_socre),
-        )
-        db.execute(
-            "INSERT INTO score(player_id, round, score, against_score) VALUES(?,?,?,?)",
-            (player_group['player_b'], round, against_socre, random_score),
-        )
-        db.commit()
+        playera_score = Score(
+            player_id=player_group.player_a, round=round, score=random_score, against_score=against_score)
+        playerb_score = Score(
+            player_id=player_group.player_b, round=round, against_score=random_score, score=against_score)
+
+        db.session.add(playera_score)
+        db.session.add(playerb_score)
+        db.session.commit()
     return redirect('/')
