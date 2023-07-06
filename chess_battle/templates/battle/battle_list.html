@@ -1,11 +1,84 @@
 {% extends 'base.html' %} {% block header %} {% endblock %} {% block content %}
 
+<!-- Modal -->
+<div class="modal fade" id="registerScores" tabindex="-1" aria-labelledby="registerScoresLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title" id="registerScoresLabel">
+          登记分数</h3>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form id="modalFrom" method="post" action="">
+          <div class="row">
+            <div class="col">
+              <h2><span class="badge badge-primary" id="firstPlayerNameSpan">先手:</span></h2>
+              <div class="form-group">
+                <label for="score_for_a">分数</label>
+                <select class="form-control" id="score_for_a" name="score_for_a">
+                  <option value="0">0</option>
+                  <option value="1">1</option>
+                  <option value="2">2</option>
+                </select>
+                <!-- <input type="text" class="form-control" name="score" id="score" /> -->
+              </div>
+              <div class="form-group">
+                <label for="notes_for_a">说明</label>
+                <select class="form-control" id="notes_for_a" name="notes_for_a">
+                  <option value="normal">正常</option>
+                  <option value="absent">缺席</option>
+                  <option value="inabsent">轮空(对手缺席)</option>
+                </select>
+                <!-- <input type="text" class="form-control" name="score" id="score" /> -->
+              </div>
+            </div>
+            <div class="col">
+              <h2><span class="badge badge-secondary" id="secondPlayerNameSpan">后手:</span></h2>
+              <div class="form-group">
+                <label for="score_for_b">分数</label>
+                <select class="form-control" id="score_for_b" name="score_for_b">
+                  <option value="0">0</option>
+                  <option value="1">1</option>
+                  <option value="2">2</option>
+                </select>
+                <!-- <input type="text" class="form-control" name="score" id="score" /> -->
+              </div>
+              <div class="form-group">
+                <label for="notes_for_b">说明</label>
+                <select class="form-control" id="notes_for_b" name="notes_for_b">
+                  <option value="normal">正常</option>
+                  <option value="absent">缺席</option>
+                  <option value="inabsent">轮空(对手缺席)</option>
+                </select>
+                <!-- <input type="text" class="form-control" name="score" id="score" /> -->
+              </div>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary mb-2" name="add">提交</button>
+          <button type="submit" class="btn btn-danger mb-2" name="update">更新</button>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <!-- <button type="button" class="btn btn-primary">Save changes</button> -->
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="card">
   <h5 class="card-header">请选择对阵轮次</h5>
   <div class="card-body">
     {% for round_number in range( g.settings['current_round'] | int) %}
     <a href="{{ url_for('battle.battle_list', round=round_number+1) }}"
-      class="btn btn-{{ 'success' if round_number+1 == g.settings['current_round']|int  else 'secondary' }}">第{{
+      class="btn btn-{{ 'success' if round_number+1 == g.settings['current_round']|int  else 'secondary' }}">
+      {% if round_number+1 == g.settings['current_round']|int %}
+      <i class="bi bi-record-circle"></i>
+      {% endif %}
+      第{{
       round_number + 1}}轮</a>
     {% endfor %}
 
@@ -15,7 +88,7 @@
 
 <br />
 <div class="card">
-  <h5 class="card-header">{% block title %}对阵表{% endblock %}</h5>
+  <h5 class="card-header">{% block title %}对阵表{% endblock %} （本轮 {{ lucky_player.player.name }} 轮空）</h5>
   <div class="card-body">
     <div class="table-responsive">
       <table class="table table-striped">
@@ -32,30 +105,32 @@
         </thead>
 
         <tbody>
-          {% for list_group in battle_list %}
+          {% for battle in battle_list %}
           <tr>
             <th class="text-nowrap" scope="row">{{ loop.index }}</th>
-            <td class="text-nowrap">{{ list_group.player_a_t.name }} <br /><span class="badge badge-secondary">{{
-                list_group.player_a_t.org }}</span></td>
-            {% if list_group.player_a_t.scores[0].score | string == 'None' %}
-            <td class="text-nowrap">正在比赛</td>
-            {% else %}
-            <td class="text-nowrap">{{ list_group.player_a_t.scores[0].score|string }}</td>
-            {% endif %}
+            <td class="text-nowrap">{{ battle.player.name }} | {{ battle.player.id }} | {{
+              battle.player.score_sum}}<br /><span class="badge badge-secondary">{{
+                battle.player.org }}</span><br /><span class="badge badge-warning">{{
+                battle.player.battle_with_idxs }}</span><br /><span class="badge badge-danger">{{
+                battle.player.battle_first_idx }}</span></td>
+            <td class="text-nowrap">{{ battle.first_score }}</td>
             <td class="text-nowrap">
-              <a class="btn btn-primary" href="{{ url_for('battle.register_score', id=list_group.player_a ) }}"
-                role="button">登记分数</a>
+              <button class="btn btn-primary" data-toggle="modal" data-target="#registerScores"
+                data-firstPlayer="{{battle.player_id}}" data-secondPlayer="{{battle.opponent_id}}"
+                data-firstPlayerName="{{battle.player.name}}" data-secondPlayerName="{{battle.opponent.name }}"
+                role="button">登记分数</button>
             </td>
-            <td class="text-nowrap">{{ list_group.player_b_t.name }} <br /><span class="badge badge-secondary">{{
-                list_group.player_b_t.org }}</span></td>
-            {% if list_group.player_b_t.scores[0].score | string == 'None' %}
-            <td class="text-nowrap">正在比赛</td>
-            {% else %}
-            <td class="text-nowrap">{{ list_group.player_b_t.scores[0].score|string }}</td>
-            {% endif %}
+            <td class="text-nowrap">{{ battle.opponent.name }} | {{ battle.opponent.id }} | {{
+              battle.opponent.score_sum}}<br /><span class="badge badge-secondary">{{
+                battle.opponent.org }}</span><br /><span class="badge badge-warning">{{
+                battle.opponent.battle_with_idxs }}</span><br /><span class="badge badge-danger">{{
+                battle.opponent.battle_first_idx }}</span></td>
+            <td class="text-nowrap">{{ battle.opponent_score }}</td>
             <td class="text-nowrap">
-              <a class="btn btn-primary" href="{{ url_for('battle.register_score', id=list_group.player_b) }}"
-                role="button">登记分数</a>
+              <button class="btn btn-primary" data-toggle="modal" data-target="#registerScores"
+                data-firstPlayer="{{battle.player_id}}" data-secondPlayer="{{battle.opponent_id}}"
+                data-firstPlayerName="{{battle.player.name}}" data-secondPlayerName="{{battle.opponent.name }}"
+                role="button">登记分数</button>
             </td>
           </tr>
           {% endfor %}

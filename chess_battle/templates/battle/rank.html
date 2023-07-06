@@ -4,12 +4,57 @@
 
 <div class="rank-header">
   <h1>{% block title %}个人总分排名{% endblock %}</h1>
-  <button id="csv_export" type="button" class="btn btn-success pull-right">导出到CSV</button>
+  <!-- <button id="csv_export" type="button" class="btn btn-success pull-right">导出到CSV</button> -->
 </div>
 {% endblock %}
 
 {% block content %}
 
+{% for score_details in all_players_score_details %}
+<!-- Modal -->
+<div class="modal fade" id="scoreDetails{{ score_details[0].id }}" tabindex="-1" aria-labelledby="scoreDetailsLabel"
+  aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title" id="scoreDetailsLabel"><span class="badge badge-primary">{{ score_details[0].name
+            }}</span>({{ score_details[0].org }})
+          得分详情</h3>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th scope="col">轮次</th>
+              <th scope="col">得分</th>
+              <th scope="col">说明</th>
+              <th scope="col">时间</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {% for score_detail_item in score_details[1] %}
+            <tr>
+              <th scope="row">{{ score_detail_item.round }}</th>
+              <td>{{ score_detail_item.score }}</td>
+              <td class="text-nowrap">{{ score_detail_item.notes }}</td>
+              <td>{{ score_detail_item.created }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <!-- <button type="button" class="btn btn-primary">Save changes</button> -->
+      </div>
+    </div>
+  </div>
+</div>
+{% endfor %}
 
 <div class="table-responsive">
   <table class="table table-striped">
@@ -20,7 +65,9 @@
         <th class="text-nowrap" scope="col">性别</th>
         <th class="text-nowrap" scope="col">单位</th>
         <th class="text-nowrap" scope="col">电话</th>
+        <th class="text-nowrap" scope="col">状态</th>
         <th class="text-nowrap" scope="col">总分</th>
+        <th class="text-nowrap" scope="col">对手分</th>
         <th class="text-nowrap" scope="col">备注</th>
         <th class="text-nowrap" scope="col">操作</th>
     </thead>
@@ -28,23 +75,23 @@
       {% for player in players %}
       <tr>
         <th scope="row">{{ loop.index }}</th>
-        <td class="text-nowrap">{{ player[0]['name'] }} </td>
-        <td class="text-nowrap">{{ player[0]['gender'] }}</td>
-        <td class="text-nowrap">{{ player[0]['org'] }}</td>
-        <td class="text-nowrap">{{ player[0]['phone'] }}</td>
-        {% if player[1] %}
-        <td class="text-nowrap">{{ player[1] }}</td>
-        {% else %}
-        <td class="text-nowrap">0</td>
-        {% endif %}
-        {% if player[0].id in lucky_players %}
-        <td class="text-nowrap">第{{ lucky_players[player.id] }}轮轮空</td>
-        {% else %}
-        <td class="text-nowrap">-</td>
-        {% endif %}
+        <td class="text-nowrap">{{ player.name }} </td>
+        <td class="text-nowrap">{{ player.gender }}</td>
+        <td class="text-nowrap">{{ player.org }}</td>
+        <td class="text-nowrap">{{ player.phone }}</td>
         <td class="text-nowrap">
-          <a class="btn btn-primary" href="{{ url_for('player.score_detail', player_id=player[0]['id']) }}"
-            role="button">得分详情</a>
+          {% if player.is_active %}
+          <i class="bi bi-check-circle-fill" style="color: green;"></i>
+          {% else %}
+          <i class="bi bi-x-circle-fill" style="color: red;"></i>
+          {% endif %}
+        </td>
+        <td class="text-nowrap">{{ player.score_sum }}</td>
+        <td class="text-nowrap">{{ player.score_sum_opponent }}</td>
+        <td class="text-nowrap">{{ player.lucky_in_round}}</td>
+        <td class="text-nowrap">
+          <button class="btn btn-primary" data-toggle="modal" data-target="#scoreDetails{{player.id}}"
+            role="button">得分详情</button>
         </td>
       </tr>
       {% endfor %}

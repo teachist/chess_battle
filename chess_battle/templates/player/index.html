@@ -1,130 +1,188 @@
 {% extends 'base.html' %} {% block title %}棋手管理{% endblock %} {% block content %}
-<div class="row">
-  <div class="col-3">
-    <div class="list-group" id="list-tab" role="tablist">
-      <a class="list-group-item list-group-item-action {{'active' if request.endpoint == 'player.list' }}"
-        id="list-player-list" data-toggle="list" href="#list-player" role="tab" aria-controls="player">棋手列表</a>
-      <a class="list-group-item list-group-item-action {{'active' if request.endpoint == 'player.add' }}"
-        id="list-player-add-list" data-toggle="list" href="#list-player-add" role="tab"
-        aria-controls="player-add">新增棋手</a>
 
-      <a class="list-group-item list-group-item-action {{'active' if request.endpoint == 'player.update' }}"
-        id="list-player-update-list" data-toggle="list" href="#list-player-update" role="tab"
-        aria-controls="player-update">编辑棋手</a>
-    </div>
-  </div>
-  <div class="col-9">
-    <div class="tab-content" id="nav-tabContent">
-      <div class="tab-pane fade show {{'active' if request.endpoint == 'player.list' }}" id="list-player"
-        role="tabpanel" aria-labelledby="list-player-list">
-        <div class="card">
-          <h5 class="card-header">棋手列表</h5>
-          <div class="card-body">
-            <div class="table-responsive">
-              <table class="table table-striped">
-                <thead class="thead-dark">
-                  <tr>
-                    <th class="text-nowrap" scope="col">#</th>
-                    <th class="text-nowrap" scope="col">姓名</th>
-                    <th class="text-nowrap" scope="col">性别</th>
-                    <th class="text-nowrap" scope="col">所在单位</th>
-                    <th class="text-nowrap" scope="col">电话</th>
-                    <th class="text-nowrap" scope="col"><i class="bi bi-people-fill"></i> 操作</th>
-                  </tr>
-                </thead>
 
-                <tbody>
-                  {% for player in players %}
-                  <tr>
-                    <th class="text-nowrap" scope="row">{{ loop.index }}</th>
-                    <td class="text-nowrap">{{ player['name'] }}</td>
-                    <td class="text-nowrap">{{ player['gender'] }}</td>
-                    <td class="text-nowrap">{{ player['org'] }}</td>
-                    <td class="text-nowrap">{{ player['phone'] }}</td>
-                    <!-- <td class="text-nowrap">
-                      <a class="btn btn-primary" href="{{ url_for('player.update', player_id=player['id']) }}"
-                        role="button">修改</a>
-                      <a class="btn btn-danger" href="{{ url_for('player.score_detail', player_id=player['id']) }}"
-                        role="button">删除</a>
-                    </td> -->
-                  </tr>
-                  {% endfor %}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
+<!-- Modal -->
+<div class="modal fade" id="deletePlayer" tabindex="-1" aria-labelledby="deletePlayerModalModalLabel"
+  aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="deletePlayerModalModalLabel">删除棋手()</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
-      <div class="tab-pane fade show {{'active' if request.endpoint == 'player.add' }}" id="list-player-add"
-        role="tabpanel" aria-labelledby="player-add-list">
-        <div class="card">
-          <h5 class="card-header">新增棋手</h5>
-          <div class="card-body">
-            <form method="post" action="{{ url_for('player.add') }}">
-              <div class="form-group">
-                <label for="name">姓名</label>
-                <input type="text" class="form-control" name="name" id="username" />
-              </div>
+      <div class="modal-body">
+        <p>你确定要删除该棋手吗？</p>
 
-              <div class="form-group">
-                <label for="gender">性别</label>
-                <input type="text" class="form-control" name="gender" id="gender" />
-              </div>
-
-              <div class="form-group">
-                <label for="org">所在单位</label>
-                <input type="text" class="form-control" name="org" id="org" />
-              </div>
-
-              <div class="form-group">
-                <label for="phone">电话</label>
-                <input type="text" class="form-control" name="phone" id="phone" />
-              </div>
-
-              <button type="submit" class="btn btn-primary mb-2">新增棋手</button>
-            </form>
-          </div>
-        </div>
       </div>
-
-      <div class="tab-pane fade show {{'active' if request.endpoint == 'player.update' }}" id="list-player-update"
-        role="tabpanel" aria-labelledby="player-update-list">
-        <div class="card">
-          <h5 class="card-header">编辑棋手</h5>
-          <div class="card-body">
-            <form method="post" action="">
-              <input class="form-control d-none" type="text" name="id" value="{{ request.args.get('id') }}" readonly />
-
-              <div class="form-group">
-                <label for="player-name">姓名</label>
-                <input type="text" class="form-control" name="name" id="player-name"
-                  value="{{ request.args.get('name') }}" />
-              </div>
-
-              <div class="form-group">
-                <label for="gender">性别</label>
-                <input type="text" class="form-control" name="gender" id="gender"
-                  value="{{ request.args.get('gender') }}" />
-              </div>
-
-              <div class="form-group">
-                <label for="org">所在单位</label>
-                <input type="text" class="form-control" name="org" id="org" value="{{ request.args.get('org') }}" />
-              </div>
-
-              <div class="form-group">
-                <label for="phone">电话</label>
-                <input type="text" class="form-control" name="phone" id="phone"
-                  value="{{ request.args.get('phone') }}" />
-              </div>
-
-              <button type="submit" class="btn btn-danger mb-2">编辑棋手</button>
-            </form>
-          </div>
-        </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+        <button type="button" class="btn btn-danger" id="deletePlayerButton">删除</button>
       </div>
     </div>
   </div>
 </div>
 
+<!-- Modal Add New-->
+<div class="modal fade" id="addNewPlayer" tabindex="-1" aria-labelledby="addNewPlayerLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title" id="addNewPlayerLabel">
+          添加棋手</h3>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form method="post" action="{{ url_for('player.add') }}" id="addNewPlayerForm">
+          <div class="form-group">
+            <label for="name">姓名</label>
+            <input type="text" class="form-control" name="name" id="name" required />
+          </div>
+
+          <div class="form-group">
+            <label for="gender">性别</label>
+            <select class="form-control" id="gender" name="gender">
+              <option value="男">男</option>
+              <option value="女">女</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="org">所在单位</label>
+            <input type="text" class="form-control" name="org" id="org" />
+          </div>
+
+          <div class="form-group">
+            <label for="phone">电话</label>
+            <input type="text" class="form-control" name="phone" id="phone" maxlength="11" minlength="11" />
+          </div>
+
+          <div class="form-group">
+            <label for="score_for_a">棋手状态</label>
+            <select class="form-control" id="status" name="status">
+              <option value="0">正常</option>
+              <option value="1">缺席</option>
+            </select>
+          </div>
+
+          <button type="submit" class="btn btn-primary mb-2">新增棋手</button>
+        </form>
+      </div>
+      <!-- <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary">Save changes</button>
+      </div> -->
+    </div>
+  </div>
+</div>
+
+
+<!-- Modal Update -->
+<div class="modal fade" id="updatePlayer" tabindex="-1" aria-labelledby="updatePlayerLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title" id="updatePlayerLabel">
+          编辑棋手</h3>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form method="post" action="{{ url_for('player.update')}}" id="updatePlayerForm">
+          <input class="form-control d-none" type="text" name="id" id="id" readonly />
+
+          <div class="form-group">
+            <label for="player-name">姓名</label>
+            <input type="text" class="form-control" name="name" id="name" required />
+          </div>
+
+          <div class="form-group">
+            <label for="gender">性别</label>
+            <select class="form-control" id="gender" name="gender">
+              <option value="男">男</option>
+              <option value="女">女</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="org">所在单位</label>
+            <input type="text" class="form-control" name="org" id="org" value="" />
+          </div>
+
+          <div class="form-group">
+            <label for="phone">电话</label>
+            <input type="text" class="form-control" name="phone" id="phone" value="" />
+          </div>
+
+          <div class="form-group">
+            <label for="status">棋手状态</label>
+            <select class="form-control" id="status" name="status">
+              <option value="0">正常</option>
+              <option value="1">缺席</option>
+            </select>
+          </div>
+
+          <button type="submit" class="btn btn-danger mb-2">编辑棋手</button>
+        </form>
+      </div>
+      <!-- <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary">Save changes</button>
+      </div> -->
+    </div>
+  </div>
+</div>
+
+
+<div class="card">
+  <h5 class="card-header">棋手管理 <button class="btn btn-success float-right" data-toggle="modal"
+      data-target="#addNewPlayer" href="" role="button">增加棋手</button></h5>
+  <div class="card-body">
+    <div class="table-responsive">
+      <table class="table table-striped">
+        <thead class="thead-dark">
+          <tr>
+            <th class="text-nowrap" scope="col">#</th>
+            <th class="text-nowrap" scope="col">姓名</th>
+            <th class="text-nowrap" scope="col">性别</th>
+            <th class="text-nowrap" scope="col">单位</th>
+            <th class="text-nowrap" scope="col">电话</th>
+            <th class="text-nowrap" scope="col">状态</th>
+            <th class="text-nowrap" scope="col"><i class="bi bi-people-fill"></i> 操作</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for player in players %}
+          <tr>
+            <th class="text-nowrap" scope="row">{{ loop.index }}</th>
+            <td class="text-nowrap">{{ player.name }}</td>
+            <td class="text-nowrap">{{ player.gender }}</td>
+            <td class="text-nowrap">{{ player.org }}</td>
+            <td class="text-nowrap">{{ player.phone }}</td>
+            <td class="text-nowrap">
+              {% if player.is_active %}
+              <i class="bi bi-check-circle-fill" style="color: green;"></i>
+              {% else %}
+              <i class="bi bi-x-circle-fill" style="color: red;"></i>
+              {% endif %}
+            </td>
+            <td class="text-nowrap">
+              <button class="btn btn-primary" data-toggle="modal" data-target="#updatePlayer" data-id="{{player.id}}"
+                data-name="{{player.name}}" data-gender="{{player.gender}}" data-phone="{{player.phone}}"
+                data-org="{{player.org}}" data-status="{{player.is_active}}" role="button">修改</button>
+              <button class="btn btn-danger" data-toggle="modal" data-target="#deletePlayer" data-id="{{player.id}}"
+                data-name="{{player.name}}" role="button">删除</button>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
 {% endblock %}

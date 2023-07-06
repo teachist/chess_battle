@@ -1,0 +1,57 @@
+{% extends 'base.html' %} {% block header %} {% endblock %} {% block content %}
+<div class="card">
+  <h2 class="card-header">
+    {% block title %}你正在为棋手登记分数{% endblock %}
+  </h2>
+  <div class="card-body">
+    <form method="post">
+      <div class="row">
+        <div class="col">
+          <h2><span class="badge badge-primary">先手:{{ first_player.name}}</span></h2>
+          <div class="form-group">
+            <label for="score_for_a">分数</label>
+            <select class="form-control" id="score_for_a" name="score_for_a">
+              <option value="0">0</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+            </select>
+            <!-- <input type="text" class="form-control" name="score" id="score" /> -->
+          </div>
+          <div class="form-group">
+            <label for="notes_for_a">说明</label>
+            <select class="form-control" id="notes_for_a" name="notes_for_a">
+              <option value="normal">正常</option>
+              <option value="absent">缺席</option>
+              <option value="inabsent">轮空(对手缺席)</option>
+            </select>
+            <!-- <input type="text" class="form-control" name="score" id="score" /> -->
+          </div>
+        </div>
+        <div class="col">
+          <h2><span class="badge badge-secondary">后手:{{ second_player.name}}</span></h2>
+          <div class="form-group">
+            <label for="score_for_b">分数</label>
+            <select class="form-control" id="score_for_b" name="score_for_b">
+              <option value="0">0</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+            </select>
+            <!-- <input type="text" class="form-control" name="score" id="score" /> -->
+          </div>
+          <div class="form-group">
+            <label for="notes_for_b">说明</label>
+            <select class="form-control" id="notes_for_b" name="notes_for_b">
+              <option value="normal">正常</option>
+              <option value="absent">缺席</option>
+              <option value="inabsent">轮空(对手缺席)</option>
+            </select>
+            <!-- <input type="text" class="form-control" name="score" id="score" /> -->
+          </div>
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary mb-2" name="add">提交</button>
+      <button type="submit" class="btn btn-danger mb-2" name="update">更新</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

@@ -31,11 +31,7 @@ def create_app(test_config=None):
     except OSError:
         pass
 
-    # a simple page that says hello
-    @app.route("/hello")
-    def hello():
-        return "Welcome to chess battle"
-    # from . import auth
+    # Bluprints
     from . import settings
     from . import player
     from . import battles
@@ -46,16 +42,48 @@ def create_app(test_config=None):
 
     app.register_blueprint(battles.bp)
     app.add_url_rule("/", endpoint="index")
-    # with app.app_context():
-    #     db.create_all()
+
+    # Manage commands
     app.cli.add_command(init_db_command, 'init-db')
+    app.cli.add_command(drop_db_command, 'drop-db')
+    app.cli.add_command(seed_db_command, 'seed-db')
     return app
 
 
 @click.command
 def init_db_command():
-    click.echo('sometext')
     """Clear the existing data and create new tables."""
     with current_app.app_context():
         db.create_all()
     click.echo("Initialized the database.")
+
+
+@click.command
+def drop_db_command():
+    """Clear the existing data and drop all tables."""
+    with current_app.app_context():
+        db.drop_all()
+    click.echo("Droped the database.")
+
+
+@click.command
+def seed_db_command():
+    # Clear Everything
+    with current_app.app_context():
+        db.drop_all()
+        db.create_all()
+    """Add some data to start"""
+    import csv
+    from chess_battle.database import Player
+    filename = current_app.config['PRE_DEFINED_DATA']
+    with open(filename, encoding='gbk', newline='') as csvfile:
+        reader = csv.DictReader(csvfile, delimiter=',', quotechar='"')
+        header = reader.fieldnames
+        click.echo(header)
+        for row in reader:
+            name, gender, org, phone = row['name'].strip(
+            ), row['gender'].strip(), row['org'].strip(), row['phone'].strip()
+            player = Player(name=name, org=org, gender=gender, phone=phone)
+            db.session.add(player)
+            db.session.commit()
+    click.echo("Seed the database.")

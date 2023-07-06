@@ -25,21 +25,23 @@ def list():
     return render_template("player/index.html", players=players)
 
 
-@bp.route("/<int:player_id>/update", methods=("GET", "POST"))
-def update(player_id):
+@bp.route("/update", methods=("POST",))
+def update():
     if request.method == 'POST':
+        player_id = int(request.form['id'].strip())
         player = Player.query.filter_by(id=player_id).first()
         if player is None:
-            message, category = 'User not found', 'warning'
+            message, category = 'Player not found!', 'warning'
             flash(message, category=category)
             return redirect(url_for('player.list'))
         else:
             try:
-                player.name = request.form["name"]
-                player.gender = request.form["gender"]
-                player.org = request.form["org"]
-                player.phone = request.form["phone"]
-                player.showable = request.form['showable']
+                player.name = request.form["name"].strip()
+                player.gender = request.form["gender"].strip()
+                player.org = request.form["org"].strip()
+                player.phone = request.form["phone"].strip()
+                player.is_active = True if int(
+                    request.form['status']) == 0 else False
 
                 db.session.commit()
                 flash(f'{player.name} Update successful.', 'success')
@@ -51,42 +53,23 @@ def update(player_id):
 
 @bp.route('/<int:player_id>/delete', methods=('GET', 'POST'))
 def delete(player_id):
-    pass
+    if request.method == 'POST':
+        message, category = None, 'warning'
+        try:
+            player = Player.query.filter_by(id=player_id).one()
+            if player:
+                db.session.delete(player)
+                db.session.commit()
+                message, category = f"{player.name} is successfully deleted!", 'success'
+                flash(message, category=category)
+            else:
+                message, category = f"Delete fail!", 'danger'
+                flash(message, category=category)
+        except:
+            message, category = f"Delete fail!", 'danger'
+            flash(message, category=category)
 
-
-def read_player_from_csv(filename):
-    import csv
-    with open(filename, encoding='gbk', newline='') as csvfile:
-        reader = csv.DictReader(csvfile, delimiter=',', quotechar='"')
-        for row in reader:
-            name, gender, org, phone = row['name'].strip(
-            ), row['gender'].strip(), row['org'].strip(), row['phone'].strip()
-            # db.execute("INSERT INTO player (name, gender, org, phone) VALUES (?, ?, ?, ?)",
-            #            (name, gender, org, phone,))
-            # db.commit()
-            player = Player(name=name, gender=gender, org=org, phone=phone)
-            db.session.add(player)
-            db.session.commit()
-
-
-@bp.route("/add_players", methods=('GET', 'POST'))
-def add_players():
-    read_player_from_csv(current_app.config['PRE_DEFINED_DATA'])
-    flash(f'Add players successful.', 'success')
-    return redirect(url_for('player.list'))
-
-
-@ bp.route("/<int:player_id>/score-detail")
-def score_detail(player_id):
-    message, category = None, 'warning'
-    player = Player.query.filter_by(id=player_id).first()
-    if player is None:
-        message = 'Player not existed'
-        return redirect('/')
-
-    score_detail = Score.query.filter_by(player.id).all()
-    flash(message, category=category)
-    return render_template("player/score_detail.html", player=player, score_detail=score_detail)
+            redirect(url_for('player.list'))
 
 
 @ bp.route("/add", methods=("GET", "POST"))
@@ -96,7 +79,10 @@ def add():
         gender = request.form["gender"].strip()
         org = request.form["org"].strip()
         phone = request.form["phone"].strip()
+        status = True if int(request.form["status"].strip()) == 0 else False
         message, category = None, 'warning'
+
+        print(request.form)
 
         if not name:
             message = "Name is required."
@@ -105,16 +91,22 @@ def add():
         if not phone or len(phone) != 11:
             message = 'Phone number is required or length not equal to 11!'
 
-        if message is None:
+        may_exist = Player.query.filter_by(
+            name=name, org=org, gender=gender, phone=phone).first()
+
+        if message is None and not may_exist:
             try:
-                player = Player(name=name, gender=gender, org=org, phone=phone)
+                print(name, gender, org, phone, status)
+                player = Player(name=name, gender=gender,
+                                org=org, phone=phone, is_active=status)
                 db.session.add(player)
                 db.session.commit()
+
                 message, category = f"{name} is successfully submit to DB.", 'success'
                 flash(message, category=category)
                 return redirect(url_for('player.list'))
             except db.IntegrityError:
-                message, category = f"User {name} is already registered.", 'danger'
+                message, category = f"User {name} may be already registered.", 'danger'
         flash(message, category=category)
 
     return render_template("player/index.html")
