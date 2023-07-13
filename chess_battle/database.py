@@ -8,6 +8,7 @@ db = SQLAlchemy()
 
 
 class Player(db.Model):
+    __tablename__ = 'players'
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(10), nullable=False)
     gender = Column(String(4), nullable=False)
@@ -44,7 +45,8 @@ class Player(db.Model):
             opponent_id=self.id).all()
         for opponent_battle in query_battles_from_opponent:
             first_idx[opponent_battle.round] = 0
-        return [(x, first_idx[x]) for x in sorted(first_idx)]
+        # return [(x, first_idx[x]) for x in sorted(first_idx)]
+        return first_idx
 
     @property
     def score_sum(self):
@@ -69,8 +71,9 @@ class Player(db.Model):
 
 
 class Score(db.Model):
+    __tablename__ = 'scores'
     id = Column(Integer, primary_key=True)
-    player_id = Column(Integer, ForeignKey('player.id'))
+    player_id = Column(Integer, ForeignKey('players.id'))
     round = Column(Integer, nullable=False)
     score = Column(Integer, nullable=False)
     notes = Column(String, default='-')
@@ -78,6 +81,7 @@ class Score(db.Model):
 
 
 class Settings(db.Model):
+    __tablename__ = 'settings'
     id = Column(Integer, primary_key=True, autoincrement=True)
     type = Column(String, default='Input')
     name = Column(String, nullable=False)
@@ -86,9 +90,10 @@ class Settings(db.Model):
 
 
 class BattleList(db.Model):
+    __tablename__ = 'battles'
     id = Column(Integer, primary_key=True, autoincrement=True)
     round = Column(Integer, nullable=False)
-    player_id = Column(Integer, ForeignKey('player.id'), nullable=False)
+    player_id = Column(Integer, ForeignKey('players.id'), nullable=False)
     opponent_id = Column(Integer)
     is_first = Column(Boolean, default=False)
 

@@ -5,8 +5,7 @@
   <div class="modal-dialog modal-dialog-centered modal-lg">
     <div class="modal-content">
       <div class="modal-header">
-        <h3 class="modal-title" id="registerScoresLabel">
-          登记分数</h3>
+        <h3 class="modal-title" id="registerScoresLabel">登记分数</h3>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
@@ -73,13 +72,11 @@
   <h5 class="card-header">请选择对阵轮次</h5>
   <div class="card-body">
     {% for round_number in range( g.settings['current_round'] | int) %}
-    <a href="{{ url_for('battle.battle_list', round=round_number+1) }}"
-      class="btn btn-{{ 'success' if round_number+1 == g.settings['current_round']|int  else 'secondary' }}">
+    <a href="{{ url_for('battle.battle_list', round=round_number+1) }}" class="btn btn-{{ 'success' if round_number+1 == g.settings['current_round']|int  else 'secondary' }}">
       {% if round_number+1 == g.settings['current_round']|int %}
       <i class="bi bi-record-circle"></i>
-      {% endif %}
-      第{{
-      round_number + 1}}轮</a>
+      {% endif %} 第{{ round_number + 1}}轮</a
+    >
     {% endfor %}
 
     <!-- <button id="csv_export_battlelist" type="button" class="btn btn-primary">导出到CSV</button> -->
@@ -88,7 +85,11 @@
 
 <br />
 <div class="card">
-  <h5 class="card-header">{% block title %}对阵表{% endblock %} （本轮 {{ lucky_player.player.name }} 轮空）</h5>
+  <h5 class="card-header">
+    {% block title %}对阵表{% endblock %} {% if lucky_player %}
+    <span>（本轮 {{ lucky_player.player.name }} 轮空）</span>
+    {% endif %}
+  </h5>
   <div class="card-body">
     <div class="table-responsive">
       <table class="table table-striped">
@@ -108,29 +109,47 @@
           {% for battle in battle_list %}
           <tr>
             <th class="text-nowrap" scope="row">{{ loop.index }}</th>
-            <td class="text-nowrap">{{ battle.player.name }} | {{ battle.player.id }} | {{
-              battle.player.score_sum}}<br /><span class="badge badge-secondary">{{
-                battle.player.org }}</span><br /><span class="badge badge-warning">{{
-                battle.player.battle_with_idxs }}</span><br /><span class="badge badge-danger">{{
-                battle.player.battle_first_idx }}</span></td>
+            <td class="text-nowrap">
+              {{ battle.player.name }} | {{ battle.player.id }} | {{ battle.player.score_sum}}<br /><span class="badge badge-secondary">{{ battle.player.org }}</span><br /><span
+                class="badge badge-warning"
+                >{{ battle.player.battle_with_idxs }}</span
+              ><br /><span class="badge badge-danger">{{ battle.player.battle_first_idx }}</span>
+            </td>
             <td class="text-nowrap">{{ battle.first_score }}</td>
             <td class="text-nowrap">
-              <button class="btn btn-primary" data-toggle="modal" data-target="#registerScores"
-                data-firstPlayer="{{battle.player_id}}" data-secondPlayer="{{battle.opponent_id}}"
-                data-firstPlayerName="{{battle.player.name}}" data-secondPlayerName="{{battle.opponent.name }}"
-                role="button">登记分数</button>
+              <button
+                class="btn btn-primary"
+                data-toggle="modal"
+                data-target="#registerScores"
+                data-firstPlayer="{{battle.player_id}}"
+                data-secondPlayer="{{battle.opponent_id}}"
+                data-firstPlayerName="{{battle.player.name}}"
+                data-secondPlayerName="{{battle.opponent.name }}"
+                role="button"
+              >
+                登记分数
+              </button>
             </td>
-            <td class="text-nowrap">{{ battle.opponent.name }} | {{ battle.opponent.id }} | {{
-              battle.opponent.score_sum}}<br /><span class="badge badge-secondary">{{
-                battle.opponent.org }}</span><br /><span class="badge badge-warning">{{
-                battle.opponent.battle_with_idxs }}</span><br /><span class="badge badge-danger">{{
-                battle.opponent.battle_first_idx }}</span></td>
+            <td class="text-nowrap">
+              {{ battle.opponent.name }} | {{ battle.opponent.id }} | {{ battle.opponent.score_sum}}<br /><span class="badge badge-secondary">{{ battle.opponent.org }}</span><br /><span
+                class="badge badge-warning"
+                >{{ battle.opponent.battle_with_idxs }}</span
+              ><br /><span class="badge badge-danger">{{ battle.opponent.battle_first_idx }}</span>
+            </td>
             <td class="text-nowrap">{{ battle.opponent_score }}</td>
             <td class="text-nowrap">
-              <button class="btn btn-primary" data-toggle="modal" data-target="#registerScores"
-                data-firstPlayer="{{battle.player_id}}" data-secondPlayer="{{battle.opponent_id}}"
-                data-firstPlayerName="{{battle.player.name}}" data-secondPlayerName="{{battle.opponent.name }}"
-                role="button">登记分数</button>
+              <button
+                class="btn btn-primary"
+                data-toggle="modal"
+                data-target="#registerScores"
+                data-firstPlayer="{{battle.player_id}}"
+                data-secondPlayer="{{battle.opponent_id}}"
+                data-firstPlayerName="{{battle.player.name}}"
+                data-secondPlayerName="{{battle.opponent.name }}"
+                role="button"
+              >
+                登记分数
+              </button>
             </td>
           </tr>
           {% endfor %}
